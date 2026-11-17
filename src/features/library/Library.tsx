@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import type { Doc } from "@/lib/db";
 import { cn } from "cn";
 
+const BRAND_ICON = `${import.meta.env.BASE_URL}images/logo.svg`;
+
 interface LibraryProps {
   docs: Doc[];
   activeId: number | null;
@@ -45,9 +47,17 @@ export function Library({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
+      <div className="flex items-center gap-2.5 border-b border-border px-4 py-3 lg:hidden">
+        <img src={BRAND_ICON} alt="" className="size-6 shrink-0" />
+        <span className="font-bangla text-base">অক্ষর</span>
+      </div>
       <div className="border-b border-border px-4 pb-4 pt-5">
-        <p className="text-xs font-semibold tracking-wide text-muted-foreground">Drafts</p>
-        <p className="mt-1 text-xs text-muted-foreground">{docs.length} on this device</p>
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-sm font-medium text-foreground">Drafts</p>
+          <p className="text-caption tabular-nums text-muted-foreground">
+            {docs.length} on this device
+          </p>
+        </div>
         <Button className="mt-4 w-full justify-start" onClick={onNew}>
           <FilePlus2 />
           New document
@@ -108,7 +118,7 @@ export function Library({
       </nav>
 
       <div className="border-t border-border px-4 py-3 text-caption text-muted-foreground">
-        Saved on this device · nothing leaves the browser
+        On this device
       </div>
     </div>
   );

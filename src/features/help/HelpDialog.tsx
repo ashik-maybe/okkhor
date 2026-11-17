@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Github } from "lucide-react";
+import { cn } from "cn";
 import {
   Dialog,
   DialogContent,
@@ -21,13 +22,13 @@ interface HelpDialogProps {
   onTabChange: (tab: HelpTab) => void;
 }
 
-const SHORTCUTS: Array<[string, string]> = [
-  ["Space / Tab / Enter", "Commit the selected Bangla word"],
-  ["↑ / ↓", "Move between suggestions"],
-  ["Esc", "Dismiss suggestions"],
-  ["Ctrl+K", "Open the command palette"],
-  ["Ctrl+.", "Switch between Bangla and English"],
-  ["?", "Show this list"],
+const SHORTCUTS: Array<[string[], string]> = [
+  [["Space"], "Commit the selected Bangla word"],
+  [["↑", "↓"], "Move between suggestions"],
+  [["Esc"], "Dismiss suggestions"],
+  [["Ctrl", "K"], "Open the command palette"],
+  [["Ctrl", "."], "Switch between Bangla and English"],
+  [["?"], "Show this list"],
 ];
 
 export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogProps) {
@@ -47,7 +48,10 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
           event.preventDefault();
           (event.currentTarget as HTMLElement).focus();
         }}
-        className="flex h-[min(85vh,720px)] flex-col gap-4 p-5 sm:max-w-3xl sm:p-6"
+        className={cn(
+          "flex flex-col gap-4 p-5 sm:max-w-3xl sm:p-6",
+          tab === "keymap" ? "h-[min(85vh,720px)]" : "max-h-[min(85vh,720px)]",
+        )}
       >
         <DialogHeader className="text-left">
           <DialogTitle>Help</DialogTitle>
@@ -84,10 +88,12 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
         {tab === "shortcuts" ? (
           <div className="min-h-0 flex-1 overflow-y-auto">
             <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
-              {SHORTCUTS.map(([key, description]) => (
-                <div key={key} className="contents">
-                  <dt>
-                    <kbd>{key}</kbd>
+              {SHORTCUTS.map(([keys, description]) => (
+                <div key={keys.join("-")} className="contents">
+                  <dt className="flex max-w-[8.5rem] flex-wrap items-center gap-1 sm:max-w-none">
+                    {keys.map((key) => (
+                      <kbd key={key}>{key}</kbd>
+                    ))}
                   </dt>
                   <dd className="text-muted-foreground">{description}</dd>
                 </div>
@@ -124,7 +130,7 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
                 if (entries.length === 0) return null;
                 return (
                   <section key={group.title}>
-                    <h3 className="text-caption font-semibold tracking-wide text-muted-foreground">
+                    <h3 className="text-caption font-semibold text-muted-foreground">
                       {group.title}
                     </h3>
                     <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -136,10 +142,10 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
                           title={`Copy ${entry.keys}`}
                           className="flex min-h-[44px] items-center justify-between gap-2 rounded-md border border-border/70 bg-muted/30 px-2.5 py-2 text-left transition-colors hover:border-primary hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                          <span className="font-bangla text-lg leading-none">{entry.glyph}</span>
+                          <span className="font-bangla text-lg leading-[1.3]">{entry.glyph}</span>
                           <span className="min-w-0 text-right">
                             <kbd className="whitespace-nowrap">{entry.keys}</kbd>
-                            <span className="mt-1 block truncate text-caption text-muted-foreground">
+                            <span className="mt-1 block truncate text-[13px] leading-snug text-muted-foreground">
                               {entry.example
                                 ? `${entry.example.roman} → ${entry.example.bangla}`
                                 : (entry.note ?? "\u00a0")}
@@ -174,21 +180,17 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
           </div>
         )}
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-caption text-muted-foreground">
-          {tab === "keymap" ? (
-            <span>
-              Keymap follows Avro Phonetic by OmicronLab ·{" "}
-              <a
-                href={OMICRONLAB_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-2 hover:text-foreground"
-              >
-                omicronlab.com
-              </a>
-            </span>
-          ) : (
-            <span>Okkhor keeps your drafts on this device.</span>
-          )}
+          <span>
+            Avro Phonetic by{" "}
+            <a
+              href={OMICRONLAB_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              OmicronLab
+            </a>
+          </span>
           <a
             href={GITHUB_URL}
             target="_blank"

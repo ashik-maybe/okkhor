@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { cn } from "cn";
 import {
   commitCandidate,
   extractToken,
@@ -257,12 +258,12 @@ export function Editor({
 
   return (
     <section className="relative flex min-h-0 flex-1 flex-col" aria-label="Writing surface">
-      <div className="mx-auto flex w-full max-w-[820px] flex-1 flex-col px-3 pb-28 pt-4 [@media(max-height:700px)]:pb-10 [@media(max-height:700px)]:pt-2 sm:px-8 sm:pb-10 sm:pt-8">
+      <div className="mx-auto flex w-full max-w-[820px] flex-1 flex-col px-3 pb-20 pt-4 [@media(max-height:700px)]:pb-10 [@media(max-height:700px)]:pt-2 sm:px-8 sm:pb-10 sm:pt-8">
         <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/70 bg-card/70 px-5 py-5 shadow-sm transition-colors focus-within:border-primary/60 [@media(max-height:700px)]:py-3 sm:px-10 sm:py-8 xl:px-12">
-          <div className="mx-auto mb-5 flex w-full max-w-[66ch] flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-3 [@media(max-height:700px)]:mb-2">
+          <div className="mx-auto mb-4 flex w-full max-w-[66ch] flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-2 [@media(max-height:700px)]:mb-2">
             <div>
               <div className="flex items-center gap-3">
-                <p className="text-xs font-semibold tracking-wide text-muted-foreground">
+                <p className="text-xs font-medium text-muted-foreground">
                   {banglaMode ? "বাংলা" : "English"}
                 </p>
                 <ModeSwitch banglaMode={banglaMode} onToggle={onToggleMode} className="sm:hidden" />
@@ -271,7 +272,9 @@ export function Editor({
                 {showIntro
                   ? "Type roman letters. Press Space to choose a Bangla word."
                   : banglaMode
-                    ? "Space commits · ↑ ↓ to choose"
+                    ? mobileCandidates
+                      ? "Tap a word to choose it"
+                      : "Space to commit · ↑↓ to choose"
                     : "Write freely in English."}
               </p>
               {banglaMode && engineError ? (
@@ -284,11 +287,7 @@ export function Editor({
               <span className="tabular-nums">{wordLabel(countWords(content))}</span>
               <span className="hidden sm:inline">·</span>
               <span>
-                {saveState === "saving"
-                  ? "Saving…"
-                  : saveState === "error"
-                    ? "Not saved"
-                    : "Saved locally"}
+                {saveState === "saving" ? "Saving…" : saveState === "error" ? "Not saved" : "Saved"}
               </span>
             </div>
           </div>
@@ -298,6 +297,7 @@ export function Editor({
           </label>
           <textarea
             id="editor"
+            rows={1}
             ref={textareaRef}
             defaultValue={content}
             lang={banglaMode ? "bn" : "en"}
@@ -315,7 +315,12 @@ export function Editor({
             autoComplete="off"
             autoCorrect="off"
             placeholder={banglaMode ? "এখানে লিখুন…" : "Start writing…"}
-            className="editor-input min-h-[45vh] w-full max-w-[66ch] flex-1 resize-none break-words self-center bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground [@media(max-height:700px)]:min-h-[30vh] sm:text-editor"
+            className={cn(
+              "editor-input w-full max-w-[66ch] resize-none break-words self-center bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-editor",
+              showIntro
+                ? "min-h-12 flex-none"
+                : "min-h-[45vh] flex-1 [@media(max-height:700px)]:min-h-[30vh]",
+            )}
             onCompositionStart={() => {
               composingRef.current = true;
             }}
@@ -335,7 +340,7 @@ export function Editor({
             onBlur={() => window.setTimeout(hide, 120)}
           />
           {showIntro ? (
-            <div className="mx-auto mt-4 flex w-full max-w-[66ch] flex-wrap items-center gap-2 border-t border-border pt-4">
+            <div className="mx-auto mt-3 flex w-full max-w-[66ch] flex-wrap items-center gap-2 border-t border-border pt-3">
               <span className="text-xs text-muted-foreground">Try:</span>
               {[
                 ["ami", "আমি"],

@@ -78,7 +78,14 @@ try {
   }
   check("header logo is shown", await page.locator('img[src$="logo.svg"]').first().isVisible());
   check("no tools rail", (await page.getByText("Tools", { exact: true }).count()) === 0);
-  check("brand appears once", (await page.getByText("অক্ষর", { exact: true }).count()) === 1);
+  check(
+    "brand appears once",
+    (await page
+      .getByText("অক্ষর", { exact: true })
+      .evaluateAll(
+        (nodes) => nodes.filter((node) => node.getBoundingClientRect().height > 0).length,
+      )) === 1,
+  );
   check(
     "active draft has a primary rule",
     await page
@@ -119,6 +126,25 @@ try {
     await searchInput.evaluate((node) => node === document.activeElement),
   );
   check("palette groups are separate", (await page.getByText("Export & share").count()) === 1);
+  const rhythm = await page.evaluate(() => {
+    const groups = [...document.querySelectorAll("[cmdk-group]")].slice(0, 2);
+    const box = (node: Element | null) => node!.getBoundingClientRect();
+    return {
+      between: Math.round(
+        box(groups[1].querySelector("[cmdk-group-heading]")).top -
+          box([...groups[0].querySelectorAll("[cmdk-item]")].pop() ?? null).bottom,
+      ),
+      inside: Math.round(
+        box(groups[1].querySelector("[cmdk-item]")).top -
+          box(groups[1].querySelector("[cmdk-group-heading]")).bottom,
+      ),
+    };
+  });
+  check(
+    "palette separates groups from their headings",
+    rhythm.between >= 12 && rhythm.inside <= 8,
+    rhythm,
+  );
   await searchInput.fill("export as .md");
   check("palette filters by command", (await page.locator("[cmdk-item]:visible").count()) === 1);
   check(
@@ -296,7 +322,7 @@ try {
       0,
   );
   await page.waitForTimeout(200);
-  check("save state is reported", await page.getByText("Saved locally").isVisible());
+  check("save state is reported", await page.getByText("Saved", { exact: true }).isVisible());
 
   await clearEditor(editor);
   await editor.pressSequentially("amar bhalo ", { delay: 60 });
@@ -330,6 +356,7 @@ try {
   );
   await themeButton.click();
   await page.getByRole("menuitem", { name: "Dark" }).click();
+  await page.waitForTimeout(200);
   check(
     "dark theme is applied",
     ((await page.locator("html").getAttribute("class")) ?? "").includes("dark"),
@@ -338,6 +365,22 @@ try {
     "theme icon follows dark mode",
     /lucide-moon/.test((await themeButton.locator("svg").getAttribute("class")) ?? ""),
   );
+  const darkAction = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    const action = [...document.querySelectorAll("button")].find((node) =>
+      node.textContent?.includes("New document"),
+    );
+    const rgb = action
+      ? (getComputedStyle(action).backgroundColor.match(/\d+/g) ?? []).slice(0, 3).map(Number)
+      : [];
+    return {
+      solid: root.getPropertyValue("--solid").trim(),
+      primary: root.getPropertyValue("--primary").trim(),
+      rgb,
+      bone: rgb.length === 3 && rgb.every((channel) => channel > 200),
+    };
+  });
+  check("dark primary action is bone, not crimson", darkAction.bone, darkAction);
   await themeButton.click();
   await page.getByRole("menuitem", { name: "Light" }).click();
   check(
@@ -446,6 +489,17 @@ try {
     await mobilePage.evaluate(() => document.activeElement?.getAttribute("aria-pressed") === null),
   );
   await mobilePage.keyboard.press("Escape");
+  const teaching = await mobilePage.evaluate(() => {
+    const hint = document.querySelector("#editor-hint")!.getBoundingClientRect();
+    const chip = [...document.querySelectorAll("button")]
+      .find((node) => node.textContent?.includes("ami"))
+      ?.getBoundingClientRect();
+    return {
+      gap: chip ? Math.round(chip.top - hint.bottom) : null,
+      hintBottom: Math.round(hint.bottom),
+    };
+  });
+  check("first-run examples sit under the prompt", (teaching.gap ?? 999) <= 120, teaching);
   const titleWidth = (await mobilePage.getByRole("textbox", { name: "Draft title" }).boundingBox())
     ?.width;
   check("draft title is legible on a phone", (titleWidth ?? 0) >= 120, titleWidth);
