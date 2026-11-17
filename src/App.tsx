@@ -32,6 +32,8 @@ import {
 import { loadBanglaMode, saveBanglaMode } from "@/lib/preferences";
 import { downloadText, safeFilename, toHtml } from "@/lib/export";
 
+const BRAND_ICON = `${import.meta.env.BASE_URL}images/logo.svg`;
+
 export function App() {
   const docs = useLiveQuery(() => listDocs(), [], [] as Doc[]);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -217,7 +219,10 @@ export function App() {
           </SheetContent>
         </Sheet>
 
-        <div className="hidden font-bangla text-xl md:block">অক্ষর</div>
+        <div className="hidden items-center gap-2.5 md:flex">
+          <img src={BRAND_ICON} alt="" className="size-7 shrink-0" />
+          <span className="font-bangla text-xl">অক্ষর</span>
+        </div>
 
         <Input
           aria-label="Draft title"

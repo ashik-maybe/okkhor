@@ -38,6 +38,18 @@ try {
   const editor = await openEditor(page);
 
   check("editor is visible", await editor.isVisible());
+  for (const [name, asset] of [
+    ["favicon", "favicon.ico"],
+    ["logo", "images/logo.svg"],
+    ["apple touch icon", "images/apple-touch-icon.png"],
+    ["social card", "images/og.png"],
+  ]) {
+    check(
+      `${name} asset is served`,
+      (await page.request.get(new URL(asset, BASE).toString())).ok(),
+    );
+  }
+  check("header logo is shown", await page.locator('img[src$="logo.svg"]').first().isVisible());
   check("no skip link in the document", (await page.locator(".skip-link").count()) === 0);
   check(
     "no 'Skip to editor' text in the document",

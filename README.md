@@ -36,6 +36,10 @@ tests/unit.test.ts         Vitest checks
 tests/e2e.ts               Playwright smoke checks
 ```
 
+## Brand
+
+The app mark is a lac-red squircle with the Bengali letter অ cut out as negative space. The glyph outline is derived from Noto Sans Bengali (SIL Open Font License). Editable masters live in `public/images/logo.svg`, `logo-dark.svg`, and `logo-mono.svg`; the favicon, touch icon, PWA icons, and social card are generated from the light master.
+
 ## Develop
 
 ```bash
