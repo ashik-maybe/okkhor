@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { Check, Ellipsis, Github, Menu, Moon, Search, Sun } from "lucide-react";
+import { Check, Copy, Ellipsis, Github, Menu, Moon, Search, Sun } from "lucide-react";
 import { cn } from "cn";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ModeSwitch } from "@/components/mode-switch";
@@ -197,6 +197,23 @@ export function App() {
     toast.success(`Exported ${format.toUpperCase()}`);
   };
 
+  const copyEverything = async () => {
+    // The editor is uncontrolled (value syncs to React only on a debounced
+    // save), so read the live textarea — what you see is what you copy.
+    const text =
+      document.querySelector<HTMLTextAreaElement>("#editor")?.value ?? activeDoc?.content ?? "";
+    if (!text.trim()) {
+      toast.message("Nothing to copy yet — start writing first.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied the whole draft");
+    } catch {
+      toast.error("Copy was blocked — select the text and copy it instead.");
+    }
+  };
+
   const exportBackup = async () => {
     const all = await db.docs.toArray();
     downloadText(
@@ -268,6 +285,12 @@ export function App() {
     { id: "txt", group: "Export & share", label: "Export as .txt", run: () => exportAs("txt") },
     { id: "md", group: "Export & share", label: "Export as .md", run: () => exportAs("md") },
     { id: "html", group: "Export & share", label: "Export as .html", run: () => exportAs("html") },
+    {
+      id: "copy-all",
+      group: "Export & share",
+      label: "Copy everything",
+      run: () => void copyEverything(),
+    },
     {
       id: "backup",
       group: "Export & share",
@@ -344,7 +367,7 @@ export function App() {
 
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground">
-      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-1.5 border-b border-border px-3 py-1.5 sm:gap-2 sm:px-4">
+      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-1 border-b border-border px-3 py-1.5 sm:gap-2 sm:px-4">
         <Sheet open={libraryOpen} onOpenChange={setLibraryOpen}>
           <SheetTrigger asChild>
             <Button
@@ -373,15 +396,26 @@ export function App() {
             if (activeDoc?.id) void updateDoc(activeDoc.id, { title: event.target.value });
           }}
           placeholder="Untitled draft"
-          className="h-11 min-w-0 max-w-xs flex-1 border-transparent bg-transparent font-medium shadow-none focus-visible:border-input sm:h-9"
+          className="h-11 min-w-24 max-w-xs flex-1 border-transparent bg-transparent font-medium shadow-none focus-visible:border-input sm:h-9"
         />
 
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
           <ModeSwitch
             banglaMode={banglaMode}
             onToggle={toggleLanguage}
             className="hidden sm:flex"
           />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-[44px] sm:size-9"
+            aria-label="Copy everything"
+            title="Copy everything"
+            onClick={() => void copyEverything()}
+          >
+            <Copy />
+          </Button>
 
           <Button
             variant="ghost"
@@ -419,6 +453,9 @@ export function App() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => void newDocument()}>New draft</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void copyEverything()}>
+                Copy everything
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => exportAs("txt")}>Export .txt</DropdownMenuItem>
               <DropdownMenuItem onClick={() => exportAs("md")}>Export .md</DropdownMenuItem>
               <DropdownMenuItem onClick={() => exportAs("html")}>Export .html</DropdownMenuItem>

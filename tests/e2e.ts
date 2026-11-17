@@ -175,6 +175,10 @@ try {
     await page.getByRole("menuitem", { name: "Export .txt" }).isVisible(),
   );
   check(
+    "document menu offers copy everything",
+    await page.getByRole("menuitem", { name: "Copy everything" }).isVisible(),
+  );
+  check(
     "document menu can clear personal words",
     await page.getByRole("menuitem", { name: "Clear personal words" }).isVisible(),
   );
@@ -619,6 +623,43 @@ try {
     reducedDuration,
   );
   await reduced.close();
+
+  const clipContext = await browser.newContext({
+    viewport: { width: 1280, height: 800 },
+    permissions: ["clipboard-read", "clipboard-write"],
+  });
+  const clipPage = await clipContext.newPage();
+  const clipEditor = await openEditor(clipPage);
+  const headerCopy = clipPage.locator("header").getByRole("button", { name: "Copy everything" });
+  await headerCopy.click();
+  await clipPage.getByText("Nothing to copy yet").waitFor();
+  check(
+    "copy everything on an empty draft says so",
+    await clipPage.getByText("Nothing to copy yet").isVisible(),
+  );
+  const sample = "Whole draft fence line.";
+  await clipEditor.fill(sample);
+  // The draft title auto-syncs from the first line, so the header-scoped
+  // locator stays unique against the library card controls. A sample that
+  // does not start with "Copy everything" also keeps the palette query
+  // matching only the command, not the draft.
+  await headerCopy.click();
+  await clipPage.waitForTimeout(300);
+  const clippedHeader = await clipPage.evaluate(() => navigator.clipboard.readText());
+  check("header copy copies the whole draft", clippedHeader === sample, clippedHeader);
+  await clipPage.getByRole("button", { name: "Document actions" }).click();
+  await clipPage.getByRole("menuitem", { name: "Copy everything" }).click();
+  await clipPage.waitForTimeout(300);
+  const clippedMenu = await clipPage.evaluate(() => navigator.clipboard.readText());
+  check("document menu copy copies the whole draft", clippedMenu === sample, clippedMenu);
+  await clipPage.keyboard.press("Escape");
+  await clipPage.keyboard.press("Control+k");
+  await clipPage.getByPlaceholder("Search drafts and commands…").fill("copy everything");
+  await clipPage.keyboard.press("Enter");
+  await clipPage.waitForTimeout(300);
+  const clippedPalette = await clipPage.evaluate(() => navigator.clipboard.readText());
+  check("palette copy copies the whole draft", clippedPalette === sample, clippedPalette);
+  await clipContext.close();
 
   const mobile = await browser.newContext({
     viewport: { width: 390, height: 844 },
