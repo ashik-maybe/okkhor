@@ -60,6 +60,10 @@ function caretPosition(textarea: HTMLTextAreaElement, cursor: number) {
     mirrorNode = document.createElement("div");
     markerNode = document.createElement("span");
     mirrorNode.style.position = "absolute";
+    // Pin it to the origin: appending an unpositioned absolute node to body
+    // otherwise extends the document below the viewport by its own height.
+    mirrorNode.style.top = "0px";
+    mirrorNode.style.left = "0px";
     mirrorNode.style.visibility = "hidden";
     mirrorNode.style.whiteSpace = "pre-wrap";
     mirrorNode.style.wordWrap = "break-word";

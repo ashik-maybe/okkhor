@@ -328,6 +328,16 @@ try {
   const options = await visibleOptions(page);
   check("candidates are shown", options.length > 1, options);
   check("first candidate is Bangla", /[\u0980-\u09FF]/.test(options[0] ?? ""), options[0]);
+  // caretPosition appends a hidden mirror to body on the first candidate
+  // render; an unpositioned absolute mirror used to add a stray scroll segment.
+  check(
+    "typing does not add vertical scroll",
+    await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1),
+    await page.evaluate(() => ({
+      scrollHeight: document.documentElement.scrollHeight,
+      innerHeight: window.innerHeight,
+    })),
+  );
 
   const activeOption = await editor.getAttribute("aria-activedescendant");
   check("editor exposes a combobox", (await editor.getAttribute("role")) === "combobox");
