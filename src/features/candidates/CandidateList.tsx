@@ -6,6 +6,7 @@ interface CandidateListProps {
   selectedIndex: number;
   visible: boolean;
   mobile: boolean;
+  rawQuery: string;
   position: { top: number; left: number } | null;
   onPick: (index: number) => void;
   onHover: (index: number) => void;
@@ -16,6 +17,7 @@ export function CandidateList({
   selectedIndex,
   visible,
   mobile,
+  rawQuery,
   position,
   onPick,
   onHover,
@@ -27,7 +29,7 @@ export function CandidateList({
       id="candidate-options"
       role="listbox"
       aria-label="Bangla word suggestions"
-      className="candidate-pop pointer-events-auto flex max-h-72 gap-1.5 overflow-x-auto overscroll-x-contain p-2 sm:max-h-none sm:min-w-56 sm:flex-col sm:overflow-visible sm:rounded-lg sm:border sm:bg-popover sm:p-1.5 sm:shadow-xl"
+      className="candidate-pop pointer-events-auto flex max-h-72 gap-1.5 overflow-x-auto overscroll-x-contain p-2 sm:max-h-none sm:min-w-56 sm:flex-col sm:overflow-visible sm:rounded-xl sm:border sm:bg-popover sm:p-1.5 sm:shadow-xl"
     >
       {candidates.map((candidate, index) => (
         <li
@@ -43,12 +45,18 @@ export function CandidateList({
           className={cn(
             "flex min-h-11 shrink-0 cursor-pointer items-center rounded-md px-3 text-base font-medium transition-colors duration-100 sm:w-full sm:justify-between sm:text-sm",
             index === selectedIndex
-              ? "bg-primary text-primary-foreground"
+              ? cn(
+                  "bg-primary text-primary-foreground",
+                  candidate.name === rawQuery ? "sm:text-base" : "sm:text-lg",
+                )
               : "bg-muted/60 text-foreground hover:bg-muted",
+            candidate.name === rawQuery && "text-muted-foreground",
           )}
         >
           <span className="truncate font-bangla">{candidate.name}</span>
-          {index === selectedIndex ? (
+          {candidate.name === rawQuery ? (
+            <span className="ml-3 hidden text-xs opacity-70 sm:inline">as typed</span>
+          ) : index === selectedIndex ? (
             <span className="ml-3 hidden text-xs opacity-70 sm:inline">Space</span>
           ) : null}
         </li>
@@ -69,7 +77,10 @@ export function CandidateList({
       className="pointer-events-none absolute z-30"
       style={{ top: position?.top ?? 0, left: position?.left ?? 0 }}
     >
-      <div className="border-l-2 border-primary pl-0.5">{list}</div>
+      <div className="relative pl-3">
+        <span className="absolute left-0.5 top-4 size-3 -skew-y-45 rounded-[2px] border-l border-t border-border bg-popover" />
+        {list}
+      </div>
     </div>
   );
 }

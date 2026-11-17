@@ -8,6 +8,7 @@ import {
 import type { AvroInstance } from "@/engine";
 import { commitSuffix } from "@/lib/typing";
 import { CandidateList } from "@/features/candidates/CandidateList";
+import { hasSeenHints, markHintsSeen } from "@/lib/preferences";
 
 interface EditorProps {
   docId: number;
@@ -16,6 +17,7 @@ interface EditorProps {
   engine: AvroInstance | null;
   personalWords: Map<string, number>;
   mobileCandidates: boolean;
+  saveState: "saved" | "saving" | "error";
   onActivate: () => void;
   onChange: (value: string) => void;
   onRememberWord: (word: string) => void;
@@ -91,6 +93,7 @@ export function Editor({
   engine,
   personalWords,
   mobileCandidates,
+  saveState,
   onActivate,
   onChange,
   onRememberWord,
@@ -102,6 +105,8 @@ export function Editor({
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [query, setQuery] = useState("");
+  const [introDismissed, setIntroDismissed] = useState(hasSeenHints);
 
   const resize = useCallback(() => {
     const textarea = textareaRef.current;
@@ -138,6 +143,7 @@ export function Editor({
   const hide = useCallback(() => {
     setVisible(false);
     setCandidates([]);
+    setQuery("");
   }, []);
 
   const refreshCandidates = useCallback(() => {
@@ -153,6 +159,7 @@ export function Editor({
       return;
     }
     const result = suggestCandidates(engine, token, personalWords);
+    setQuery(token);
     setCandidates(result.candidates);
     setSelectedIndex(0);
     setVisible(true);
@@ -183,6 +190,8 @@ export function Editor({
       onChange(next);
       onRememberWord(candidate.name);
       setAnnouncement(`Committed ${candidate.name}`);
+      setIntroDismissed(true);
+      markHintsSeen();
       if (tokenMatch && engine) commitCandidate(engine, tokenMatch[1], candidate.name);
       hide();
       resize();
@@ -190,6 +199,25 @@ export function Editor({
     },
     [candidates, engine, hide, onChange, onRememberWord, resize],
   );
+
+  const insertExample = (roman: string, bangla: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const next = `${bangla} `;
+    textarea.value = next;
+    textarea.setSelectionRange(next.length, next.length);
+    onChange(next);
+    onRememberWord(bangla);
+    if (engine) commitCandidate(engine, roman, bangla);
+    setAnnouncement(`Committed ${bangla}`);
+    setIntroDismissed(true);
+    markHintsSeen();
+    hide();
+    resize();
+    textarea.focus();
+  };
+
+  const showIntro = !introDismissed && banglaMode && content.trim() === "";
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (composingRef.current || event.nativeEvent.isComposing) return;
@@ -221,65 +249,98 @@ export function Editor({
 
   return (
     <section className="relative flex min-h-0 flex-1 flex-col" aria-label="Writing surface">
-      <div className="mx-auto flex w-full max-w-[76ch] flex-1 flex-col px-4 pb-28 pt-6 sm:px-8 sm:pb-10 sm:pt-10">
-        <div className="mb-5 flex items-baseline justify-between gap-4 border-b border-border pb-3">
-          <div>
-            <p className="text-xs font-semibold tracking-wide text-muted-foreground">
-              {banglaMode ? "Bangla phonetic" : "English input"}
-            </p>
-            <p id="editor-hint" className="mt-1 text-sm text-muted-foreground">
-              Type roman letters, then press <kbd>Space</kbd> to choose a word.
-            </p>
+      <div className="mx-auto flex w-full max-w-[66ch] flex-1 flex-col px-3 pb-28 pt-4 sm:px-8 sm:pb-10 sm:pt-8">
+        <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/70 bg-card/70 px-5 py-5 shadow-sm sm:px-10 sm:py-8">
+          <div className="mb-5 flex items-baseline justify-between gap-4 border-b border-border pb-3">
+            <div>
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground">
+                {banglaMode ? "বাংলা" : "English"}
+              </p>
+              <p id="editor-hint" className="mt-1 text-sm text-muted-foreground">
+                {showIntro
+                  ? "Type roman letters. Press Space to choose a Bangla word."
+                  : banglaMode
+                    ? "Space commits · ↑ ↓ to choose"
+                    : "Write freely in English."}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+              <span className="tabular-nums">{countWords(content)} words</span>
+              <span className="hidden sm:inline">·</span>
+              <span>
+                {saveState === "saving"
+                  ? "Saving…"
+                  : saveState === "error"
+                    ? "Not saved"
+                    : "Saved locally"}
+              </span>
+            </div>
           </div>
-          <p className="shrink-0 text-xs tabular-nums text-muted-foreground">
-            {countWords(content)} words
+
+          <label className="sr-only" htmlFor="editor">
+            {banglaMode ? "Write in Bangla" : "Write in English"}
+          </label>
+          <textarea
+            id="editor"
+            ref={textareaRef}
+            defaultValue={content}
+            lang={banglaMode ? "bn" : "en"}
+            dir="ltr"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={visible && candidates.length > 0}
+            aria-controls="candidate-options"
+            aria-activedescendant={
+              visible && candidates.length > 0 ? `candidate-${selectedIndex}` : undefined
+            }
+            aria-describedby="editor-hint"
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            autoCorrect="off"
+            placeholder={banglaMode ? "এখানে লিখুন…" : "Start writing…"}
+            className="editor-input min-h-[45vh] w-full flex-1 resize-none break-words bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-[1.625rem]"
+            onCompositionStart={() => {
+              composingRef.current = true;
+            }}
+            onCompositionEnd={() => {
+              composingRef.current = false;
+              refreshCandidates();
+            }}
+            onInput={(event) => {
+              const value = event.currentTarget.value;
+              onChange(value);
+              resize();
+              refreshCandidates();
+            }}
+            onFocus={onActivate}
+            onKeyDown={handleKeyDown}
+            onClick={refreshCandidates}
+            onBlur={() => window.setTimeout(hide, 120)}
+          />
+          {showIntro ? (
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+              <span className="text-xs text-muted-foreground">Try:</span>
+              {[
+                ["ami", "আমি"],
+                ["bhalo", "ভালো"],
+              ].map(([roman, bangla]) => (
+                <button
+                  key={roman}
+                  type="button"
+                  onClick={() => insertExample(roman, bangla)}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background px-3 text-sm transition-colors hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
+                >
+                  <span className="font-bangla font-medium">{bangla}</span>
+                  <span className="text-xs text-muted-foreground">← {roman}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <p className="sr-only" role="status" aria-live="polite">
+            {announcement}
           </p>
         </div>
-
-        <label className="sr-only" htmlFor="editor">
-          {banglaMode ? "Write in Bangla" : "Write in English"}
-        </label>
-        <textarea
-          id="editor"
-          ref={textareaRef}
-          defaultValue={content}
-          lang={banglaMode ? "bn" : "en"}
-          dir="ltr"
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={visible && candidates.length > 0}
-          aria-controls="candidate-options"
-          aria-activedescendant={
-            visible && candidates.length > 0 ? `candidate-${selectedIndex}` : undefined
-          }
-          aria-describedby="editor-hint"
-          spellCheck={false}
-          autoCapitalize="off"
-          autoComplete="off"
-          autoCorrect="off"
-          placeholder={banglaMode ? "এখানে লিখুন…" : "Start writing…"}
-          className="editor-input min-h-[50vh] w-full flex-1 resize-none break-words bg-transparent font-editor text-xl leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-2xl"
-          onCompositionStart={() => {
-            composingRef.current = true;
-          }}
-          onCompositionEnd={() => {
-            composingRef.current = false;
-            refreshCandidates();
-          }}
-          onInput={(event) => {
-            const value = event.currentTarget.value;
-            onChange(value);
-            resize();
-            refreshCandidates();
-          }}
-          onFocus={onActivate}
-          onKeyDown={handleKeyDown}
-          onClick={refreshCandidates}
-          onBlur={() => window.setTimeout(hide, 120)}
-        />
-        <p className="sr-only" role="status" aria-live="polite">
-          {announcement}
-        </p>
       </div>
 
       <CandidateList
@@ -287,6 +348,7 @@ export function Editor({
         selectedIndex={selectedIndex}
         visible={visible}
         mobile={mobileCandidates}
+        rawQuery={query}
         position={position}
         onPick={pick}
         onHover={setSelectedIndex}

@@ -58,6 +58,8 @@ export function App() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
+  const saveTimer = useRef<number | null>(null);
   const [ready, setReady] = useState(false);
   const enginePromise = useRef<Promise<AvroInstance> | null>(null);
   const engineFailed = useRef(false);
@@ -141,8 +143,22 @@ export function App() {
 
   const changeContent = (value: string) => {
     if (!activeDoc?.id) return;
-    void updateDoc(activeDoc.id, { content: value, title: makeTitle(value, activeDoc.id - 1) });
+    const id = activeDoc.id;
+    setSaveState("saving");
+    if (saveTimer.current !== null) window.clearTimeout(saveTimer.current);
+    saveTimer.current = window.setTimeout(() => {
+      void updateDoc(id, { content: value, title: makeTitle(value, id - 1) })
+        .then(() => setSaveState("saved"))
+        .catch(() => setSaveState("error"));
+    }, 120);
   };
+
+  useEffect(
+    () => () => {
+      if (saveTimer.current !== null) window.clearTimeout(saveTimer.current);
+    },
+    [],
+  );
 
   const remember = (word: string) => setPersonalWords(rememberWord(word));
 
@@ -283,17 +299,13 @@ export function App() {
             onClick={toggleLanguage}
             className="relative h-9 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-muted/60"
           >
-            <span
-              className={cn(
-                "absolute inset-0 flex items-center text-xs font-bold text-muted-foreground",
-                banglaMode ? "justify-end pr-3" : "justify-start pl-3",
-              )}
-            >
-              {banglaMode ? "EN" : "বাং"}
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-between px-2.5 text-[11px] font-bold text-muted-foreground">
+              <span>বাং</span>
+              <span>EN</span>
             </span>
             <span
               className={cn(
-                "absolute left-0.5 top-0.5 flex size-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground shadow-sm transition-transform duration-normal ease-out",
+                "absolute left-0.5 top-0.5 flex size-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground shadow-sm transition-transform duration-normal ease-out active:scale-95",
                 banglaMode ? "translate-x-0" : "translate-x-11",
               )}
             >
@@ -347,6 +359,7 @@ export function App() {
             engine={engine}
             personalWords={personalWords}
             mobileCandidates={mobileCandidates}
+            saveState={saveState}
             onActivate={activateEngine}
             onChange={changeContent}
             onRememberWord={remember}

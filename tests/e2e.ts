@@ -38,6 +38,17 @@ try {
   const editor = await openEditor(page);
 
   check("editor is visible", await editor.isVisible());
+  check(
+    "first run teaches the one mechanic",
+    await page.getByText("Type roman letters. Press Space to choose a Bangla word.").isVisible(),
+  );
+  check(
+    "editor sits on a paper surface",
+    await editor.evaluate(
+      (node) => getComputedStyle(node.parentElement!).backgroundColor !== "rgba(0, 0, 0, 0)",
+    ),
+  );
+  check("writing measure is capped", ((await editor.boundingBox())?.width ?? 0) <= 900);
   for (const [name, asset] of [
     ["favicon", "favicon.ico"],
     ["logo", "images/logo.svg"],
@@ -122,6 +133,13 @@ try {
     /Committed\s+আমি/.test((await page.getByRole("status").innerText()).trim()),
     await page.getByRole("status").innerText(),
   );
+  check(
+    "intro retires after the first commit",
+    (await page.getByText("Type roman letters. Press Space to choose a Bangla word.").count()) ===
+      0,
+  );
+  await page.waitForTimeout(200);
+  check("save state is reported", await page.getByText("Saved locally").isVisible());
 
   await clearEditor(editor);
   await editor.pressSequentially("amar bhalo ", { delay: 60 });
