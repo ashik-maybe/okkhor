@@ -3,6 +3,7 @@
 
 import { chromium, type Locator, type Page } from "playwright";
 import { KEYMAP_EXAMPLES } from "../src/lib/keymap";
+import { GITHUB_URL } from "../src/lib/links";
 
 const BASE = process.env.BASE ?? "http://localhost:4173/okkhor/";
 const failures: string[] = [];
@@ -82,8 +83,21 @@ try {
   );
   await page.keyboard.press("Escape");
 
+  const headerSource = page.locator("header").getByRole("link", { name: "View source on GitHub" });
+  check("GitHub icon is in the header", await headerSource.isVisible());
+  check("GitHub icon points at the repo", (await headerSource.getAttribute("href")) === GITHUB_URL);
+  check(
+    "GitHub icon opens safely",
+    (await headerSource.getAttribute("target")) === "_blank" &&
+      Boolean((await headerSource.getAttribute("rel"))?.includes("noreferrer")),
+  );
+
   await page.keyboard.press("Control+k");
   check("palette can jump to drafts", await page.getByText("Jump to draft").isVisible());
+  check(
+    "palette offers the GitHub source",
+    await page.getByText("View source on GitHub").isVisible(),
+  );
   const searchInput = page.getByPlaceholder("Search drafts and commands…");
   check("palette has a visible search field", await searchInput.isVisible());
   check(
@@ -120,6 +134,10 @@ try {
   check(
     "keymap is one tap from help",
     await page.getByRole("textbox", { name: "Filter Avro keymap" }).isVisible(),
+  );
+  check(
+    "help links to the source",
+    await page.getByRole("dialog").getByRole("link", { name: "View source on GitHub" }).isVisible(),
   );
   const keymapButton = page.getByTitle("Copy kh").first();
   check("keymap shows keys and glyphs", await keymapButton.isVisible());
@@ -376,6 +394,13 @@ try {
   const mobilePage = await mobile.newPage();
   await openEditor(mobilePage);
   check("mobile editor is visible", await mobilePage.isVisible("#editor"));
+  check(
+    "GitHub icon stays out of the phone header",
+    !(await mobilePage
+      .locator("header")
+      .getByRole("link", { name: "View source on GitHub" })
+      .isVisible()),
+  );
   const titleWidth = (await mobilePage.getByRole("textbox", { name: "Draft title" }).boundingBox())
     ?.width;
   check("draft title is legible on a phone", (titleWidth ?? 0) >= 120, titleWidth);

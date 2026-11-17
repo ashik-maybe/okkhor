@@ -1,9 +1,9 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { Check, Ellipsis, Menu, Moon, Search, Sun } from "lucide-react";
+import { Check, Ellipsis, Github, Menu, Moon, Search, Sun } from "lucide-react";
 import { cn } from "cn";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ModeSwitch } from "@/components/mode-switch";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +46,7 @@ import {
 } from "@/lib/documents";
 import { loadBanglaMode, saveBanglaMode } from "@/lib/preferences";
 import { downloadText, safeFilename, toHtml } from "@/lib/export";
+import { GITHUB_URL } from "@/lib/links";
 
 const BRAND_ICON = `${import.meta.env.BASE_URL}images/logo.svg`;
 const wordCount = (text: string) => (text.trim() ? text.trim().split(/\s+/).length : 0);
@@ -293,6 +294,13 @@ export function App() {
       label: "Avro keymap",
       run: () => openHelp("keymap"),
     },
+    {
+      id: "github",
+      group: "Help",
+      label: "View source on GitHub",
+      hint: "↗",
+      run: () => window.open(GITHUB_URL, "_blank", "noopener,noreferrer"),
+    },
   ];
 
   useEffect(() => {
@@ -446,6 +454,20 @@ export function App() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="View source on GitHub"
+            title="Source on GitHub"
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "icon" }),
+              "hidden size-9 sm:inline-flex",
+            )}
+          >
+            <Github />
+          </a>
         </div>
       </header>
 

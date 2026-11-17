@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { Github } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { KEYMAP } from "@/lib/keymap";
+import { GITHUB_URL, OMICRONLAB_URL } from "@/lib/links";
 
 export type HelpTab = "shortcuts" | "keymap";
 
@@ -161,19 +163,35 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
                 </p>
               ) : null}
             </div>
-            <p className="border-t border-border pt-3 text-caption text-muted-foreground">
+          </div>
+        )}
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-caption text-muted-foreground">
+          {tab === "keymap" ? (
+            <span>
               Keymap follows Avro Phonetic by OmicronLab ·{" "}
               <a
-                href="https://www.omicronlab.com/"
+                href={OMICRONLAB_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="underline underline-offset-2 hover:text-foreground"
               >
                 omicronlab.com
               </a>
-            </p>
-          </div>
-        )}
+            </span>
+          ) : (
+            <span>Okkhor keeps your drafts on this device.</span>
+          )}
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="View source on GitHub"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-sm px-1 underline underline-offset-2 transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring sm:min-h-0"
+          >
+            <Github className="size-4" />
+            Source on GitHub
+          </a>
+        </div>
       </DialogContent>
     </Dialog>
   );
