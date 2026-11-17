@@ -313,6 +313,51 @@ try {
   const mobilePage = await mobile.newPage();
   await openEditor(mobilePage);
   check("mobile editor is visible", await mobilePage.isVisible("#editor"));
+  const titleWidth = (await mobilePage.getByRole("textbox", { name: "Draft title" }).boundingBox())
+    ?.width;
+  check("draft title is legible on a phone", (titleWidth ?? 0) >= 120, titleWidth);
+  const touchTargets = await mobilePage.evaluate(() =>
+    [...document.querySelectorAll("button")]
+      .filter((node) => node.getBoundingClientRect().height > 0)
+      .map((node) => ({
+        name: node.getAttribute("aria-label") ?? node.textContent?.trim().slice(0, 20),
+        h: Math.round(node.getBoundingClientRect().height),
+      })),
+  );
+  check(
+    "touch controls are at least 44px",
+    touchTargets.every((target) => (target.h ?? 0) >= 44),
+    touchTargets,
+  );
+  check(
+    "no text below the 12px floor",
+    await mobilePage.evaluate(() => {
+      const nodes = [...document.querySelectorAll("body *")].filter((el) => {
+        const s = getComputedStyle(el);
+        return (
+          s.display !== "none" &&
+          s.visibility !== "hidden" &&
+          [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 1)
+        );
+      });
+      return nodes.every((el) => parseFloat(getComputedStyle(el).fontSize) >= 12);
+    }),
+  );
+  await mobilePage.locator("#editor").click();
+  await mobilePage.keyboard.type("ami");
+  await mobilePage.waitForSelector("[role=listbox]:visible", { timeout: 20000 });
+  const strip = await mobilePage.locator('[role="listbox"]').evaluate((node) => {
+    const box = node.getBoundingClientRect();
+    const hint = document.querySelector("#editor-hint")!.getBoundingClientRect();
+    return {
+      top: Math.round(box.top),
+      bottom: Math.round(box.bottom),
+      hintBottom: Math.round(hint.bottom),
+      vh: innerHeight,
+    };
+  });
+  check("candidate strip sits at the bottom on phones", strip.bottom >= strip.vh - 1, strip);
+  check("candidate strip never covers the hint", strip.top >= strip.hintBottom, strip);
   await mobilePage.getByRole("button", { name: "Open drafts" }).click();
   await mobilePage.waitForTimeout(300);
   const mobileDelete = mobilePage.getByRole("button", { name: /^Delete / }).first();

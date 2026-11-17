@@ -8,6 +8,7 @@ import {
 import type { AvroInstance } from "@/engine";
 import { commitSuffix } from "@/lib/typing";
 import { CandidateList } from "@/features/candidates/CandidateList";
+import { ModeSwitch } from "@/components/mode-switch";
 import { hasSeenHints, markHintsSeen } from "@/lib/preferences";
 
 interface EditorProps {
@@ -19,6 +20,7 @@ interface EditorProps {
   mobileCandidates: boolean;
   saveState: "saved" | "saving" | "error";
   engineError: boolean;
+  onToggleMode: () => void;
   onActivate: () => void;
   onChange: (value: string) => void;
   onRememberWord: (word: string) => void;
@@ -96,6 +98,7 @@ export function Editor({
   mobileCandidates,
   saveState,
   engineError,
+  onToggleMode,
   onActivate,
   onChange,
   onRememberWord,
@@ -255,9 +258,12 @@ export function Editor({
         <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/70 bg-card/70 px-5 py-5 shadow-sm sm:px-10 sm:py-8">
           <div className="mb-5 flex items-baseline justify-between gap-4 border-b border-border pb-3">
             <div>
-              <p className="text-xs font-semibold tracking-wide text-muted-foreground">
-                {banglaMode ? "বাংলা" : "English"}
-              </p>
+              <div className="flex items-center gap-3">
+                <p className="text-xs font-semibold tracking-wide text-muted-foreground">
+                  {banglaMode ? "বাংলা" : "English"}
+                </p>
+                <ModeSwitch banglaMode={banglaMode} onToggle={onToggleMode} className="sm:hidden" />
+              </div>
               <p id="editor-hint" className="mt-1 text-sm text-muted-foreground">
                 {showIntro
                   ? "Type roman letters. Press Space to choose a Bangla word."

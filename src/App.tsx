@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Check, Ellipsis, Menu, Moon, Search, Sun } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
+import { ModeSwitch } from "@/components/mode-switch";
 import {
   Dialog,
   DialogContent,
@@ -300,10 +301,15 @@ export function App() {
 
   return (
     <div className="flex h-dvh min-h-[480px] flex-col bg-background text-foreground">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3 sm:px-4">
+      <header className="flex min-h-14 shrink-0 items-center gap-1.5 border-b border-border px-3 py-1.5 sm:gap-2 sm:px-4">
         <Sheet open={libraryOpen} onOpenChange={setLibraryOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open drafts">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-11 md:hidden sm:size-9"
+              aria-label="Open drafts"
+            >
               <Menu />
             </Button>
           </SheetTrigger>
@@ -324,36 +330,20 @@ export function App() {
             if (activeDoc?.id) void updateDoc(activeDoc.id, { title: event.target.value });
           }}
           placeholder="Untitled draft"
-          className="h-9 min-w-0 max-w-xs flex-1 border-transparent bg-transparent font-medium shadow-none focus-visible:border-input"
+          className="h-11 min-w-0 max-w-xs flex-1 border-transparent bg-transparent font-medium shadow-none focus-visible:border-input sm:h-9"
         />
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={banglaMode}
-            aria-label="Toggle Bangla and English input"
-            title={banglaMode ? "Bangla phonetic input" : "English input"}
-            onClick={toggleLanguage}
-            className="relative h-9 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-muted/60"
-          >
-            <span className="pointer-events-none absolute inset-0 flex items-center justify-between px-2.5 text-[11px] font-bold text-muted-foreground">
-              <span>বাং</span>
-              <span>EN</span>
-            </span>
-            <span
-              className={cn(
-                "absolute left-0.5 top-0.5 flex size-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground shadow-sm transition-transform duration-normal ease-out active:scale-95",
-                banglaMode ? "translate-x-0" : "translate-x-11",
-              )}
-            >
-              {banglaMode ? "বাং" : "EN"}
-            </span>
-          </button>
+          <ModeSwitch
+            banglaMode={banglaMode}
+            onToggle={toggleLanguage}
+            className="hidden sm:flex"
+          />
 
           <Button
             variant="ghost"
             size="icon"
+            className="size-11 sm:size-9"
             aria-label="Open command palette"
             title="Command palette (Ctrl+K)"
             onClick={() => setCommandOpen(true)}
@@ -363,7 +353,13 @@ export function App() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Document actions" title="Document">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11 sm:size-9"
+                aria-label="Document actions"
+                title="Document"
+              >
                 <Ellipsis />
               </Button>
             </DropdownMenuTrigger>
@@ -400,6 +396,7 @@ export function App() {
               <Button
                 variant="ghost"
                 size="icon"
+                className="size-11 sm:size-9"
                 aria-label="Change theme"
                 title={`Theme: ${theme}`}
               >
@@ -433,6 +430,7 @@ export function App() {
             mobileCandidates={mobileCandidates}
             saveState={saveState}
             engineError={engineError}
+            onToggleMode={toggleLanguage}
             onActivate={activateEngine}
             onChange={changeContent}
             onRememberWord={remember}

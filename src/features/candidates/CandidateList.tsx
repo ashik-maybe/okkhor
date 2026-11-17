@@ -66,7 +66,7 @@ export function CandidateList({
 
   if (mobile) {
     return (
-      <div className="fixed inset-x-0 z-40 border-t border-border bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px))] pt-2 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px))] pt-2 backdrop-blur">
         {list}
       </div>
     );

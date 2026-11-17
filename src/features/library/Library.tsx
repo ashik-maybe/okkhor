@@ -107,7 +107,7 @@ export function Library({
         )}
       </nav>
 
-      <div className="border-t border-border px-4 py-3 text-[11px] text-muted-foreground">
+      <div className="border-t border-border px-4 py-3 text-caption text-muted-foreground">
         Saved on this device · nothing leaves the browser
       </div>
     </div>
