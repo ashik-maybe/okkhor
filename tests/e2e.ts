@@ -43,7 +43,13 @@ async function openEditor(page: Page): Promise<Locator> {
   check("server HTML is not an empty shell", html.includes("<h1>Okkhor — Bangla writing studio"));
   check(
     "server HTML answers the FAQ visibly",
-    html.includes("Which keyboard does Okkhor use?") && html.includes("Does Okkhor work offline?"),
+    html.includes("Which keyboard does Okkhor use?") &&
+      html.includes("Does Okkhor work offline?") &&
+      html.includes("Where is my writing stored?"),
+  );
+  check(
+    "server HTML shows a product screenshot with alt text",
+    /<img[^>]+src="[^"]*images\/screenshot\.jpg"[^>]*alt="[^"]+"/.test(html),
   );
   const ldBlocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
     .map((m) => {
