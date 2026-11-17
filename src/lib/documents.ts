@@ -52,6 +52,15 @@ export function loadPersonalWords(): Map<string, number> {
   return new Map();
 }
 
+export function clearPersonalWords(): Map<string, number> {
+  try {
+    localStorage.removeItem(WORDS_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+  return new Map();
+}
+
 export function rememberWord(word: string): Map<string, number> {
   const words = loadPersonalWords();
   const key = word.normalize("NFC");

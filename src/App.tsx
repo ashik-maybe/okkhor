@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { Check, Download, Languages, Menu, Moon, Search, Sun, Upload } from "lucide-react";
+import { Check, Ellipsis, Menu, Moon, Search, Sun } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -30,6 +32,7 @@ import { loadEngine } from "@/lib/avro-service";
 import type { AvroInstance } from "@/engine";
 import { db, type Doc } from "@/lib/db";
 import {
+  clearPersonalWords,
   createDoc,
   deleteDoc,
   listDocs,
@@ -43,6 +46,7 @@ import { loadBanglaMode, saveBanglaMode } from "@/lib/preferences";
 import { downloadText, safeFilename, toHtml } from "@/lib/export";
 
 const BRAND_ICON = `${import.meta.env.BASE_URL}images/logo.svg`;
+const wordCount = (text: string) => (text.trim() ? text.trim().split(/\s+/).length : 0);
 const CommandPalette = lazy(async () => {
   const module = await import("@/features/command/CommandPalette");
   return { default: module.CommandPalette };
@@ -161,6 +165,11 @@ export function App() {
   );
 
   const remember = (word: string) => setPersonalWords(rememberWord(word));
+
+  const forgetPersonalWords = () => {
+    setPersonalWords(clearPersonalWords());
+    toast.success("Personal words cleared");
+  };
 
   const exportAs = (format: "txt" | "md" | "html") => {
     if (!activeDoc) return;
@@ -325,6 +334,40 @@ export function App() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Document actions" title="Document">
+                <Ellipsis />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel className="truncate font-bangla text-base">
+                {activeDoc?.title ?? "Untitled draft"}
+              </DropdownMenuLabel>
+              <DropdownMenuLabel className="font-normal text-muted-foreground">
+                {wordCount(activeDoc?.content ?? "")} words · {personalWords.size} personal words
+              </DropdownMenuLabel>
+              <DropdownMenuLabel className="font-normal text-muted-foreground">
+                Updated {new Date(activeDoc?.updatedAt ?? Date.now()).toLocaleString("en-GB")}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => void newDocument()}>New draft</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportAs("txt")}>Export .txt</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportAs("md")}>Export .md</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportAs("html")}>Export .html</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => void exportBackup()}>
+                Download backup
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                Import file
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={forgetPersonalWords}>
+                Clear personal words
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
@@ -365,46 +408,6 @@ export function App() {
             onRememberWord={remember}
           />
         </main>
-
-        <aside className="hidden w-64 shrink-0 border-l border-border bg-card p-4 lg:block">
-          <p className="text-xs font-semibold tracking-wide text-muted-foreground">Tools</p>
-          <div className="mt-3 space-y-1">
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => exportAs("txt")}
-            >
-              <Download /> Export text
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => exportAs("html")}
-            >
-              <Download /> Export HTML
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => void exportBackup()}
-            >
-              <Download /> Backup JSON
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full justify-start"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload /> Import file
-            </Button>
-          </div>
-          <div className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">
-            <p className="flex items-center gap-2">
-              <Languages className="size-4" /> {banglaMode ? "Bangla phonetic" : "English input"}
-            </p>
-            <p className="mt-2">{personalWords.size} personal words</p>
-          </div>
-        </aside>
       </div>
 
       <input

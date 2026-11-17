@@ -46,8 +46,8 @@ export function Library({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="border-b border-border px-4 pb-4 pt-5">
-        <p className="font-bangla text-2xl leading-none text-foreground">অক্ষর</p>
-        <p className="mt-1 text-xs text-muted-foreground">Bangla writing studio</p>
+        <p className="text-xs font-semibold tracking-wide text-muted-foreground">Drafts</p>
+        <p className="mt-1 text-xs text-muted-foreground">{docs.length} on this device</p>
         <Button className="mt-4 w-full justify-start" onClick={onNew}>
           <FilePlus2 />
           New document
@@ -78,10 +78,10 @@ export function Library({
                   onClick={() => onSelect(doc.id!)}
                   aria-current={doc.id === activeId ? "page" : undefined}
                   className={cn(
-                    "flex w-full flex-col items-start gap-1 rounded-md px-3 py-2.5 pr-12 text-left transition-colors sm:pr-10",
+                    "flex w-full flex-col items-start gap-1 rounded-md border-l-2 px-3 py-2.5 pr-12 text-left transition-colors sm:pr-10",
                     doc.id === activeId
-                      ? "bg-secondary text-secondary-foreground"
-                      : "hover:bg-muted/70",
+                      ? "border-primary bg-secondary text-secondary-foreground"
+                      : "border-transparent hover:bg-muted/70",
                   )}
                 >
                   <span className="line-clamp-1 w-full text-sm font-medium">{doc.title}</span>

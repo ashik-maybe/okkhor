@@ -61,6 +61,25 @@ try {
     );
   }
   check("header logo is shown", await page.locator('img[src$="logo.svg"]').first().isVisible());
+  check("no tools rail", (await page.getByText("Tools", { exact: true }).count()) === 0);
+  check("brand appears once", (await page.getByText("অক্ষর", { exact: true }).count()) === 1);
+  check(
+    "active draft has a primary rule",
+    await page
+      .locator('[aria-current="page"]')
+      .first()
+      .evaluate((node) => getComputedStyle(node).borderLeftColor !== "rgba(0, 0, 0, 0)"),
+  );
+  await page.getByRole("button", { name: "Document actions" }).click();
+  check(
+    "document menu holds export actions",
+    await page.getByRole("menuitem", { name: "Export .txt" }).isVisible(),
+  );
+  check(
+    "document menu can clear personal words",
+    await page.getByRole("menuitem", { name: "Clear personal words" }).isVisible(),
+  );
+  await page.keyboard.press("Escape");
   check("no skip link in the document", (await page.locator(".skip-link").count()) === 0);
   check(
     "no 'Skip to editor' text in the document",
