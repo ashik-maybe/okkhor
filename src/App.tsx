@@ -480,6 +480,12 @@ export function App() {
                 Clear personal words
               </DropdownMenuItem>
               <DropdownMenuItem
+                onClick={() => setDeleteAllOpen(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                Delete all drafts…
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={() => setDeleteAllOpen(true)}
               >
@@ -605,15 +611,15 @@ export function App() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete all drafts?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove {docs.length === 1 ? "1 draft" : `${docs.length} drafts`}{" "}
-              from this device. This cannot be undone. Consider downloading a backup first.
+              This will permanently remove {docs.length} draft{docs.length === 1 ? "" : "s"} from
+              this device. This cannot be undone. Download a backup first if you want to keep them.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => void confirmDeleteAll()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete all drafts
             </AlertDialogAction>
