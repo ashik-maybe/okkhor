@@ -83,6 +83,27 @@ try {
 
   await page.keyboard.press("Control+k");
   check("palette can jump to drafts", await page.getByText("Jump to draft").isVisible());
+  const searchInput = page.getByPlaceholder("Search drafts and commands…");
+  check("palette has a visible search field", await searchInput.isVisible());
+  check(
+    "palette search starts focused",
+    await searchInput.evaluate((node) => node === document.activeElement),
+  );
+  check("palette groups are separate", (await page.getByText("Export & share").count()) === 1);
+  await searchInput.fill("export as .md");
+  check("palette filters by command", (await page.locator("[cmdk-item]:visible").count()) === 1);
+  check(
+    "palette empty state is honest",
+    !(await page.getByText("Nothing matches", { exact: false }).count()),
+  );
+  await searchInput.fill("no-such-command");
+  check(
+    "palette explains zero results",
+    await page.getByText("Nothing matches", { exact: false }).isVisible(),
+  );
+  const paletteBox = await page.getByRole("dialog").boundingBox();
+  check("palette is wide enough to scan", (paletteBox?.width ?? 0) >= 560, paletteBox);
+  check("palette keyboard legend is shown", await page.getByText(/↑↓.*move/).isVisible());
   await page.keyboard.press("Escape");
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.keyboard.press("?");

@@ -243,22 +243,50 @@ export function App() {
   };
 
   const commands: CommandAction[] = [
-    { id: "new", label: "New draft", hint: "Ctrl+N", run: () => void newDocument() },
-    { id: "lang", label: "Toggle Bangla / English", hint: "Ctrl+.", run: toggleLanguage },
-    { id: "txt", label: "Export as .txt", run: () => exportAs("txt") },
-    { id: "md", label: "Export as .md", run: () => exportAs("md") },
-    { id: "html", label: "Export as .html", run: () => exportAs("html") },
-    { id: "backup", label: "Download full backup", run: () => void exportBackup() },
-    { id: "import", label: "Import a file", run: () => fileInputRef.current?.click() },
+    {
+      id: "lang",
+      group: "Writing",
+      label: "Toggle Bangla / English",
+      hint: "Ctrl+.",
+      run: toggleLanguage,
+    },
+    {
+      id: "new",
+      group: "Drafts",
+      label: "New draft",
+      hint: "Ctrl+N",
+      run: () => void newDocument(),
+    },
+    {
+      id: "import",
+      group: "Drafts",
+      label: "Import a file",
+      run: () => fileInputRef.current?.click(),
+    },
+    { id: "txt", group: "Export & share", label: "Export as .txt", run: () => exportAs("txt") },
+    { id: "md", group: "Export & share", label: "Export as .md", run: () => exportAs("md") },
+    { id: "html", group: "Export & share", label: "Export as .html", run: () => exportAs("html") },
+    {
+      id: "backup",
+      group: "Export & share",
+      label: "Download full backup",
+      run: () => void exportBackup(),
+    },
+    { id: "theme-light", group: "Appearance", label: "Theme: light", run: () => setTheme("light") },
+    { id: "theme-dark", group: "Appearance", label: "Theme: dark", run: () => setTheme("dark") },
+    {
+      id: "theme-system",
+      group: "Appearance",
+      label: "Theme: system",
+      run: () => setTheme("system"),
+    },
     {
       id: "shortcuts",
+      group: "Help",
       label: "Keyboard shortcuts",
       hint: "?",
       run: () => setShortcutsOpen(true),
     },
-    { id: "theme-light", label: "Theme: light", run: () => setTheme("light") },
-    { id: "theme-dark", label: "Theme: dark", run: () => setTheme("dark") },
-    { id: "theme-system", label: "Theme: system", run: () => setTheme("system") },
   ];
 
   useEffect(() => {
