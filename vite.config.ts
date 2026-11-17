@@ -56,4 +56,19 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Keep stable vendor chunks cacheable across app-only deploys.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("@radix-ui") || id.includes("/radix-ui/") || id.includes("/cmdk/"))
+            return "ui";
+          if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/scheduler/"))
+            return "react";
+          if (id.includes("/dexie")) return "data";
+        },
+      },
+    },
+  },
 });

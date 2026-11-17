@@ -40,6 +40,10 @@ tests/e2e.ts               Playwright smoke checks
 
 The app mark is a lac-red squircle with the Bengali letter অ cut out as negative space. The glyph outline is derived from Noto Sans Bengali (SIL Open Font License). Editable masters live in `public/images/logo.svg`, `logo-dark.svg`, and `logo-mono.svg`; the favicon, touch icon, PWA icons, and social card are generated from the light master.
 
+## Input, motion and performance
+
+The textarea is a combobox: it owns the active suggestion through `aria-activedescendant`, and committed words are announced in a polite live region. Motion uses shared easing and duration tokens, stays on compositor properties, and collapses under `prefers-reduced-motion`. The 3.9 MB phonetic dictionary loads after first paint or on editor focus, and the command palette and vendor code are split into cacheable chunks.
+
 ## Develop
 
 ```bash

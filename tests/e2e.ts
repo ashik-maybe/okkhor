@@ -70,6 +70,37 @@ try {
   check("candidates are shown", options.length > 1, options);
   check("first candidate is Bangla", /[\u0980-\u09FF]/.test(options[0] ?? ""), options[0]);
 
+  const activeOption = await editor.getAttribute("aria-activedescendant");
+  check("editor exposes a combobox", (await editor.getAttribute("role")) === "combobox");
+  check(
+    "combobox announces the expanded list",
+    (await editor.getAttribute("aria-expanded")) === "true",
+  );
+  check(
+    "combobox controls the rendered listbox",
+    (await editor.getAttribute("aria-controls")) ===
+      (await page.locator("[role=listbox]:visible").getAttribute("id")),
+  );
+  check(
+    "active descendant is the selected option",
+    Boolean(activeOption) &&
+      (await page.locator(`#${activeOption}`).getAttribute("aria-selected")) === "true",
+    activeOption,
+  );
+  check(
+    "candidate option ids are unique",
+    await page.evaluate(() => {
+      const ids = [...document.querySelectorAll("[role=option]")].map((node) => node.id);
+      return ids.length > 1 && new Set(ids).size === ids.length;
+    }),
+  );
+  check(
+    "candidate popup animates in",
+    (await page
+      .locator(".candidate-pop")
+      .evaluate((node) => getComputedStyle(node).animationName)) !== "none",
+  );
+
   await editor.press("Tab");
   check(
     "Tab commits a candidate",
@@ -85,6 +116,11 @@ try {
     "Space commits a candidate",
     (await editor.inputValue()) === "আমি ",
     await editor.inputValue(),
+  );
+  check(
+    "committed word is announced",
+    /Committed\s+আমি/.test((await page.getByRole("status").innerText()).trim()),
+    await page.getByRole("status").innerText(),
   );
 
   await clearEditor(editor);
@@ -175,6 +211,25 @@ try {
   const historyTop = (await visibleOptions(historyPage))[0] ?? "";
   check("history cannot hijack the candidate list", historyTop.includes("আমি"), historyTop);
   await historyContext.close();
+
+  const reduced = await browser.newContext({
+    viewport: { width: 1280, height: 800 },
+    reducedMotion: "reduce",
+  });
+  const reducedPage = await reduced.newPage();
+  const reducedEditor = await openEditor(reducedPage);
+  await reducedEditor.click();
+  await reducedEditor.pressSequentially("amar", { delay: 40 });
+  await reducedPage.waitForSelector("[role=listbox]:visible", { timeout: 20000 });
+  const reducedDuration = await reducedPage
+    .locator(".candidate-pop")
+    .evaluate((node) => getComputedStyle(node).animationDuration);
+  check(
+    "reduced motion removes candidate movement",
+    parseFloat(reducedDuration) <= 0.001,
+    reducedDuration,
+  );
+  await reduced.close();
 
   const mobile = await browser.newContext({
     viewport: { width: 390, height: 844 },

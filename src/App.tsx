@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
 import { Check, Download, Languages, Menu, Moon, Search, Sun, Upload } from "lucide-react";
@@ -15,7 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "@/components/theme-provider";
 import { Editor } from "@/features/editor/Editor";
 import { Library } from "@/features/library/Library";
-import { CommandPalette, type CommandAction } from "@/features/command/CommandPalette";
+import type { CommandAction } from "@/features/command/CommandPalette";
 import { loadEngine } from "@/lib/avro-service";
 import type { AvroInstance } from "@/engine";
 import { db, type Doc } from "@/lib/db";
@@ -33,6 +33,10 @@ import { loadBanglaMode, saveBanglaMode } from "@/lib/preferences";
 import { downloadText, safeFilename, toHtml } from "@/lib/export";
 
 const BRAND_ICON = `${import.meta.env.BASE_URL}images/logo.svg`;
+const CommandPalette = lazy(async () => {
+  const module = await import("@/features/command/CommandPalette");
+  return { default: module.CommandPalette };
+});
 
 export function App() {
   const docs = useLiveQuery(() => listDocs(), [], [] as Doc[]);
@@ -44,6 +48,11 @@ export function App() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [ready, setReady] = useState(false);
+  const enginePromise = useRef<Promise<AvroInstance> | null>(null);
+  const engineFailed = useRef(false);
+  const [mobileCandidates, setMobileCandidates] = useState(
+    () => window.matchMedia("(max-width: 639px)").matches,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { theme, resolvedTheme, setTheme } = useTheme();
 
@@ -66,10 +75,27 @@ export function App() {
     };
   }, []);
 
+  const activateEngine = useCallback(() => {
+    enginePromise.current ??= loadEngine();
+    void enginePromise.current.then(setEngine).catch(() => {
+      if (engineFailed.current) return;
+      engineFailed.current = true;
+      toast.error("The phonetic engine could not load. Plain typing still works.");
+    });
+  }, []);
+
   useEffect(() => {
-    loadEngine()
-      .then(setEngine)
-      .catch(() => toast.error("The phonetic engine could not load. Plain typing still works."));
+    // The 3.9 MB dictionary is a classic script, so parsing it on first paint
+    // dominates main-thread time. Warm it after paint, or sooner on focus.
+    const timer = window.setTimeout(activateEngine, 1200);
+    return () => window.clearTimeout(timer);
+  }, [activateEngine]);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 639px)");
+    const update = () => setMobileCandidates(query.matches);
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
   }, []);
 
   useEffect(() => {
@@ -246,7 +272,7 @@ export function App() {
           >
             <span
               className={cn(
-                "absolute inset-0 flex items-center text-xs font-bold text-muted-foreground/80",
+                "absolute inset-0 flex items-center text-xs font-bold text-muted-foreground",
                 banglaMode ? "justify-end pr-3" : "justify-start pl-3",
               )}
             >
@@ -254,7 +280,7 @@ export function App() {
             </span>
             <span
               className={cn(
-                "absolute left-0.5 top-0.5 flex size-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground shadow-sm transition-transform duration-200 ease-out",
+                "absolute left-0.5 top-0.5 flex size-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground shadow-sm transition-transform duration-normal ease-out",
                 banglaMode ? "translate-x-0" : "translate-x-11",
               )}
             >
@@ -301,21 +327,17 @@ export function App() {
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col">
-          {ready ? (
-            <Editor
-              docId={activeDoc?.id ?? 0}
-              content={activeDoc?.content ?? ""}
-              banglaMode={banglaMode}
-              engine={engine}
-              personalWords={personalWords}
-              onChange={changeContent}
-              onRememberWord={remember}
-            />
-          ) : (
-            <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-              Preparing your alphabet…
-            </div>
-          )}
+          <Editor
+            docId={activeDoc?.id ?? 0}
+            content={activeDoc?.content ?? ""}
+            banglaMode={banglaMode}
+            engine={engine}
+            personalWords={personalWords}
+            mobileCandidates={mobileCandidates}
+            onActivate={activateEngine}
+            onChange={changeContent}
+            onRememberWord={remember}
+          />
         </main>
 
         <aside className="hidden w-64 shrink-0 border-l border-border bg-card p-4 lg:block">
@@ -371,7 +393,9 @@ export function App() {
         }}
       />
 
-      <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} actions={commands} />
+      <Suspense fallback={null}>
+        <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} actions={commands} />
+      </Suspense>
     </div>
   );
 }

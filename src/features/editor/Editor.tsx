@@ -15,6 +15,8 @@ interface EditorProps {
   banglaMode: boolean;
   engine: AvroInstance | null;
   personalWords: Map<string, number>;
+  mobileCandidates: boolean;
+  onActivate: () => void;
   onChange: (value: string) => void;
   onRememberWord: (word: string) => void;
 }
@@ -39,30 +41,35 @@ const MIRROR_PROPERTIES = [
   "tab-size",
 ];
 
+// Reuse one hidden mirror. Creating and removing a DOM node on every keystroke
+// forced a full style recalculation and was the most expensive part of typing.
+let mirrorNode: HTMLDivElement | null = null;
+let markerNode: HTMLSpanElement | null = null;
+
 function caretPosition(textarea: HTMLTextAreaElement, cursor: number) {
   const computed = getComputedStyle(textarea);
-  const mirror = document.createElement("div");
-  for (const property of MIRROR_PROPERTIES) {
-    mirror.style.setProperty(property, computed.getPropertyValue(property));
+  if (!mirrorNode || !markerNode) {
+    mirrorNode = document.createElement("div");
+    markerNode = document.createElement("span");
+    mirrorNode.style.position = "absolute";
+    mirrorNode.style.visibility = "hidden";
+    mirrorNode.style.whiteSpace = "pre-wrap";
+    mirrorNode.style.wordWrap = "break-word";
+    mirrorNode.style.overflow = "hidden";
+    mirrorNode.style.pointerEvents = "none";
+    document.body.appendChild(mirrorNode);
   }
-  mirror.style.position = "absolute";
-  mirror.style.visibility = "hidden";
-  mirror.style.whiteSpace = "pre-wrap";
-  mirror.style.wordWrap = "break-word";
-  mirror.style.overflow = "hidden";
-  mirror.textContent = textarea.value.slice(0, cursor);
+  for (const property of MIRROR_PROPERTIES) {
+    mirrorNode.style.setProperty(property, computed.getPropertyValue(property));
+  }
+  mirrorNode.textContent = textarea.value.slice(0, cursor);
+  markerNode.textContent = textarea.value.slice(cursor) || ".";
+  mirrorNode.appendChild(markerNode);
 
-  const marker = document.createElement("span");
-  marker.textContent = textarea.value.slice(cursor) || ".";
-  mirror.appendChild(marker);
-  document.body.appendChild(mirror);
-
-  const result = {
-    top: marker.offsetTop - textarea.scrollTop + textarea.offsetTop,
-    left: marker.offsetLeft - textarea.scrollLeft + textarea.offsetLeft,
+  return {
+    top: markerNode.offsetTop - textarea.scrollTop + textarea.offsetTop,
+    left: markerNode.offsetLeft - textarea.scrollLeft + textarea.offsetLeft,
   };
-  mirror.remove();
-  return result;
 }
 
 function countWords(text: string): number {
@@ -83,6 +90,8 @@ export function Editor({
   banglaMode,
   engine,
   personalWords,
+  mobileCandidates,
+  onActivate,
   onChange,
   onRememberWord,
 }: EditorProps) {
@@ -92,6 +101,7 @@ export function Editor({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const [announcement, setAnnouncement] = useState("");
 
   const resize = useCallback(() => {
     const textarea = textareaRef.current;
@@ -172,6 +182,7 @@ export function Editor({
 
       onChange(next);
       onRememberWord(candidate.name);
+      setAnnouncement(`Committed ${candidate.name}`);
       if (tokenMatch && engine) commitCandidate(engine, tokenMatch[1], candidate.name);
       hide();
       resize();
@@ -216,11 +227,11 @@ export function Editor({
             <p className="text-xs font-semibold tracking-wide text-muted-foreground">
               {banglaMode ? "Bangla phonetic" : "English input"}
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p id="editor-hint" className="mt-1 text-sm text-muted-foreground">
               Type roman letters, then press <kbd>Space</kbd> to choose a word.
             </p>
           </div>
-          <p className="shrink-0 text-xs text-muted-foreground" aria-live="polite">
+          <p className="shrink-0 text-xs tabular-nums text-muted-foreground" aria-live="polite">
             {countWords(content)} words
           </p>
         </div>
@@ -234,12 +245,20 @@ export function Editor({
           defaultValue={content}
           lang={banglaMode ? "bn" : "en"}
           dir="ltr"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={visible && candidates.length > 0}
+          aria-controls="candidate-options"
+          aria-activedescendant={
+            visible && candidates.length > 0 ? `candidate-${selectedIndex}` : undefined
+          }
+          aria-describedby="editor-hint"
           spellCheck={false}
           autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
           placeholder={banglaMode ? "এখানে লিখুন…" : "Start writing…"}
-          className="min-h-[50vh] w-full flex-1 resize-none bg-transparent font-editor text-xl leading-[1.9] text-foreground outline-none placeholder:text-muted-foreground/60 sm:text-2xl"
+          className="editor-input min-h-[50vh] w-full flex-1 resize-none break-words bg-transparent font-editor text-xl leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-2xl"
           onCompositionStart={() => {
             composingRef.current = true;
           }}
@@ -253,21 +272,21 @@ export function Editor({
             resize();
             refreshCandidates();
           }}
+          onFocus={onActivate}
           onKeyDown={handleKeyDown}
           onClick={refreshCandidates}
-          onKeyUp={(event) => {
-            if (event.key === "Ctrl" || event.key === "Meta" || event.key.startsWith("Arrow"))
-              return;
-            refreshCandidates();
-          }}
           onBlur={() => window.setTimeout(hide, 120)}
         />
+        <p className="sr-only" role="status" aria-live="polite">
+          {announcement}
+        </p>
       </div>
 
       <CandidateList
         candidates={candidates}
         selectedIndex={selectedIndex}
         visible={visible}
+        mobile={mobileCandidates}
         position={position}
         onPick={pick}
         onHover={setSelectedIndex}
