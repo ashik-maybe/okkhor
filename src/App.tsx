@@ -12,6 +12,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useTheme } from "@/components/theme-provider";
 import { Editor } from "@/features/editor/Editor";
 import { Library } from "@/features/library/Library";
@@ -47,6 +57,7 @@ export function App() {
   const [personalWords, setPersonalWords] = useState(() => loadPersonalWords());
   const [commandOpen, setCommandOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [ready, setReady] = useState(false);
   const enginePromise = useRef<Promise<AvroInstance> | null>(null);
   const engineFailed = useRef(false);
@@ -119,11 +130,13 @@ export function App() {
     toast.success("New draft created");
   };
 
-  const removeDocument = async (id: number) => {
-    if (!window.confirm("Delete this draft? This cannot be undone.")) return;
-    await deleteDoc(id);
-    if (activeId === id) setActiveId(null);
-    toast.success("Draft deleted");
+  const confirmDelete = async () => {
+    if (deleteId === null) return;
+    const title = docs.find((doc) => doc.id === deleteId)?.title ?? "Untitled draft";
+    await deleteDoc(deleteId);
+    if (activeId === deleteId) setActiveId(null);
+    setDeleteId(null);
+    toast.success(`Deleted “${title}”`);
   };
 
   const changeContent = (value: string) => {
@@ -227,7 +240,7 @@ export function App() {
         setLibraryOpen(false);
       }}
       onNew={() => void newDocument()}
-      onDelete={(id) => void removeDocument(id)}
+      onDelete={setDeleteId}
     />
   );
 
@@ -396,6 +409,23 @@ export function App() {
       <Suspense fallback={null}>
         <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} actions={commands} />
       </Suspense>
+
+      <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Delete “{docs.find((doc) => doc.id === deleteId)?.title ?? "Untitled draft"}”?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              The draft will be removed from this device. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void confirmDelete()}>Delete draft</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

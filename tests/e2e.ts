@@ -170,6 +170,21 @@ try {
     ((await page.locator("html").getAttribute("class")) ?? "").includes("light"),
   );
 
+  await page
+    .getByRole("button", { name: /^Delete / })
+    .first()
+    .click();
+  check(
+    "delete confirmation is an in-page dialog",
+    await page.getByRole("alertdialog").isVisible(),
+  );
+  check(
+    "delete confirmation names the draft",
+    (await page.getByRole("alertdialog").innerText()).includes("“"),
+  );
+  await page.getByRole("button", { name: "Cancel" }).click();
+  check("cancel keeps the draft", (await page.locator("#editor").count()) === 1);
+
   await page.waitForTimeout(300);
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForSelector("#editor", { timeout: 20000 });
@@ -240,6 +255,12 @@ try {
   const mobilePage = await mobile.newPage();
   await openEditor(mobilePage);
   check("mobile editor is visible", await mobilePage.isVisible("#editor"));
+  await mobilePage.getByRole("button", { name: "Open drafts" }).click();
+  await mobilePage.waitForTimeout(300);
+  const mobileDelete = mobilePage.getByRole("button", { name: /^Delete / }).first();
+  check("delete is reachable on touch", await mobileDelete.isVisible());
+  const deleteBox = await mobileDelete.boundingBox();
+  check("touch delete target is at least 44px", (deleteBox?.height ?? 0) >= 44, deleteBox);
   check(
     "no horizontal overflow on mobile",
     await mobilePage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),

@@ -231,7 +231,7 @@ export function Editor({
               Type roman letters, then press <kbd>Space</kbd> to choose a word.
             </p>
           </div>
-          <p className="shrink-0 text-xs tabular-nums text-muted-foreground" aria-live="polite">
+          <p className="shrink-0 text-xs tabular-nums text-muted-foreground">
             {countWords(content)} words
           </p>
         </div>

@@ -78,7 +78,7 @@ export function Library({
                   onClick={() => onSelect(doc.id!)}
                   aria-current={doc.id === activeId ? "page" : undefined}
                   className={cn(
-                    "flex w-full flex-col items-start gap-1 rounded-md px-3 py-2.5 text-left transition-colors",
+                    "flex w-full flex-col items-start gap-1 rounded-md px-3 py-2.5 pr-12 text-left transition-colors sm:pr-10",
                     doc.id === activeId
                       ? "bg-secondary text-secondary-foreground"
                       : "hover:bg-muted/70",
@@ -97,7 +97,7 @@ export function Library({
                   aria-label={`Delete ${doc.title}`}
                   title="Delete document"
                   onClick={() => onDelete(doc.id!)}
-                  className="absolute right-2 top-2 hidden size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive hover:text-destructive-foreground focus-visible:flex group-hover:flex"
+                  className="absolute right-1 top-1 flex size-11 items-center justify-center rounded-md text-muted-foreground opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground focus-visible:opacity-100 sm:right-2 sm:top-2 sm:size-8 sm:opacity-0 sm:group-hover:opacity-100"
                 >
                   <Trash2 className="size-4" />
                 </button>
