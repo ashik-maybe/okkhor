@@ -485,12 +485,6 @@ export function App() {
               >
                 Delete all drafts…
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => setDeleteAllOpen(true)}
-              >
-                Delete all drafts…
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
