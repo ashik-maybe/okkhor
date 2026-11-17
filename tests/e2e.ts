@@ -179,6 +179,10 @@ try {
     "help links to the source",
     await page.getByRole("dialog").getByRole("link", { name: "View source on GitHub" }).isVisible(),
   );
+  check(
+    "word frequency data is attributed",
+    await page.getByRole("dialog").getByRole("link", { name: "wordfreq" }).isVisible(),
+  );
   const keymapButton = page.getByTitle("Copy kh").first();
   check("keymap shows keys and glyphs", await keymapButton.isVisible());
   check("keymap shows a word example", await page.getByText("amar → আমার").first().isVisible());
@@ -212,6 +216,72 @@ try {
     keymapMismatches.length === 0,
     keymapMismatches,
   );
+  const GOLDEN_WORDS: Array<[string, string, number?]> = [
+    ["amar", "আমার"],
+    ["tumi", "তুমি"],
+    ["kemon", "কেমন"],
+    ["acho", "আছো"],
+    ["bhalo", "ভালো"],
+    ["somoy", "সময়"],
+    ["bari", "বাড়ি"],
+    ["khabo", "খাবো"],
+    ["jete", "যেতে"],
+    ["meye", "মেয়ে"],
+    ["hridoy", "হৃদয়"],
+    ["onek", "অনেক"],
+    ["kichu", "কিছু"],
+    ["ekhane", "এখানে"],
+    ["kothay", "কোথায়"],
+    ["rate", "রাতে"],
+    ["kotha", "কথা"],
+    ["valobasha", "ভালোবাসা"],
+    ["dhonnobad", "ধন্যবাদ"],
+    ["bhalobasha", "ভালোবাসা"],
+    ["nei", "নেই"],
+    ["hoy", "হয়"],
+    ["kore", "করে"],
+    ["korte", "করতে"],
+    ["bolo", "বলো"],
+    ["jani", "জানি"],
+    ["tahole", "তাহলে"],
+    ["kintu", "কিন্তু"],
+    ["tai", "তাই"],
+    ["jonno", "জন্য"],
+    ["sathe", "সাথে"],
+    ["theke", "থেকে"],
+    ["upor", "উপর"],
+    ["niche", "নিচে"],
+    ["aj", "আজ"],
+    ["kal", "কাল"],
+    ["ekhon", "এখন"],
+    ["tokhon", "তখন"],
+    ["keno", "কেন"],
+    ["kivabe", "কীভাবে"],
+    ["khub", "খুব"],
+    ["bhalobashi", "ভালোবাসি"],
+    ["kI", "কী", 3],
+    ["kkhoma", "ক্ষমা"],
+  ];
+  await editor.click();
+  await editor.press("Control+a");
+  await editor.press("Backspace");
+  const goldenMisses: Array<{ roman: string; expected: string; got: string[] }> = [];
+  for (const [roman, expected, maxRank = 1] of GOLDEN_WORDS) {
+    await editor.pressSequentially(roman, { delay: 12 });
+    await page.waitForSelector("[role=listbox]:visible", { timeout: 20000 });
+    await page.waitForTimeout(160);
+    const options = (await visibleOptions(page)).map((text) =>
+      text.replace(/\s*(Space|as typed)$/, "").trim(),
+    );
+    const rank = options.indexOf(expected) + 1;
+    if (rank < 1 || rank > maxRank) {
+      goldenMisses.push({ roman, expected, got: options.slice(0, 4) });
+    }
+    await editor.press("Control+a");
+    await editor.press("Backspace");
+    await page.waitForTimeout(70);
+  }
+  check("common words rank at the top", goldenMisses.length === 0, goldenMisses);
   check(
     "accent follows the green palette, not a stray indigo",
     await page.evaluate(() => {
@@ -327,7 +397,7 @@ try {
   await clearEditor(editor);
   await editor.pressSequentially("amar bhalo ", { delay: 60 });
   const multiWord = await editor.inputValue();
-  check("each roman word converts on Space", multiWord === "আমার ভাল ", multiWord);
+  check("each roman word converts on Space", multiWord === "আমার ভালো ", multiWord);
 
   await clearEditor(editor);
   await editor.pressSequentially("tumi.", { delay: 60 });

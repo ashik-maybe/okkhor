@@ -34,7 +34,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,woff2,png,svg,webmanifest}"],
+        globPatterns: ["**/*.{js,css,html,tsv,woff2,png,svg,webmanifest}"],
         globIgnores: ["**/avro*.js", "**/lexicon/**"],
         navigateFallback: `${base}index.html`,
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,

@@ -42,7 +42,7 @@ The app mark is a lac-red squircle with the Bengali letter অ cut out as negati
 
 ## Input, motion and performance
 
-The textarea is a combobox: it owns the active suggestion through `aria-activedescendant`, and committed words are announced in a polite live region. Motion uses shared easing and duration tokens, stays on compositor properties, and collapses under `prefers-reduced-motion`. The 3.9 MB phonetic dictionary loads after first paint or on editor focus, and the command palette and vendor code are split into cacheable chunks.
+The textarea is a combobox: it owns the active suggestion through `aria-activedescendant`, and committed words are announced in a polite live region. Motion uses shared easing and duration tokens, stays on compositor properties, and collapses under `prefers-reduced-motion`. The 3.9 MB phonetic dictionary and a 52 KB word-frequency table load after first paint or on editor focus, and the command palette and vendor code are split into cacheable chunks. Frequency only re-ranks candidates the engine already produced; it never replaces the dictionary.
 
 ## Develop
 
@@ -71,4 +71,4 @@ Push to `main`. The workflow typechecks, lints, checks formatting, runs unit and
 
 ## Licensing
 
-`src/engine/avro.min.js` is the original OmicronLab 2013 engine and remains under MPL-1.1. The alias data and new application code are original work. A repository-level license has not been chosen yet.
+`src/engine/avro.min.js` is the original OmicronLab 2013 engine and remains under MPL-1.1. `src/data/word-frequency.tsv` is derived from wordfreq's Bengali data and is licensed CC BY-SA 4.0; see `public/licenses/wordfreq.md` and regenerate it with `python3 scripts/build-word-frequency.py`. The alias data and new application code are original work. A repository-level license has not been chosen yet.

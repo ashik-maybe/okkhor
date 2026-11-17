@@ -1,6 +1,7 @@
 import { loadAvro, type AvroInstance } from "../engine";
 import { loadCandidateSelections, saveCandidateSelections } from "./storage";
 import { MODERN_ALIASES } from "../data/modern-aliases";
+import { getWordFrequency, loadWordFrequency, type FrequencyTable } from "../data/word-frequency";
 
 export interface AvroCandidate {
   id: number;
@@ -19,9 +20,13 @@ const ENGINE_STEP = 10;
 const ALIAS_PREFIX = 100;
 const ALIAS_EXACT = 2000;
 const REMEMBERED = 2500;
+// One zipf point is worth six alphabetical ranks. Capped so frequency can
+// never outrank an exact alias or a word the user picked before.
+const FREQUENCY_WEIGHT = 60;
+const MAX_FREQUENCY = 8;
 
 export async function loadEngine(): Promise<AvroInstance> {
-  const Avro = await loadAvro();
+  const [Avro] = await Promise.all([loadAvro(), loadWordFrequency().catch(() => undefined)]);
   return new Avro(loadCandidateSelections, saveCandidateSelections);
 }
 
@@ -39,6 +44,7 @@ export function suggestCandidates(
   engine: AvroInstance,
   query: string,
   personalWords: ReadonlyMap<string, number>,
+  frequency: FrequencyTable = getWordFrequency(),
   max = 20,
 ): CandidateResult {
   const normalizedQuery = query.toLowerCase().normalize("NFC");
@@ -81,10 +87,14 @@ export function suggestCandidates(
   // Personal frequency only nudges candidates that are already relevant.
   // Injecting remembered words here used to flood the list and outrank the
   // word the user was actually typing.
-  const scored = Array.from(pool, ([name, score]) => ({
-    name,
-    score: score + Math.min(personalWords.get(name) ?? 0, 5),
-  }));
+  const scored = Array.from(pool, ([name, score]) => {
+    const zipf = frequency.get(name);
+    const prior = zipf ? Math.min(zipf, MAX_FREQUENCY) * FREQUENCY_WEIGHT : 0;
+    return {
+      name,
+      score: score + prior + Math.min(personalWords.get(name) ?? 0, 5),
+    };
+  });
   scored.sort((a, b) => b.score - a.score);
 
   const candidates = scored.slice(0, max).map((entry, id) => ({ id, name: entry.name }));

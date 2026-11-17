@@ -190,6 +190,16 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
             >
               OmicronLab
             </a>
+            {" · Word ranks by "}
+            <a
+              href="https://github.com/rspeer/wordfreq"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              wordfreq
+            </a>{" "}
+            (CC BY-SA 4.0)
           </span>
           <a
             href={GITHUB_URL}

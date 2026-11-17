@@ -149,4 +149,10 @@ export const MODERN_ALIASES: Readonly<Record<string, string>> = {
   bandwidth: "ব্যান্ডউইথ",
   latency: "ল্যাটেন্সি",
   ping: "পিং",
+
+  // Common words the engine buries behind a rare homophone.
+  bolo: "বলো",
+  khabo: "খাবো",
+  kivabe: "কীভাবে",
+  bhalobashi: "ভালোবাসি",
 };

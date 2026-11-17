@@ -61,6 +61,48 @@ describe("candidate ranking", () => {
   });
 });
 
+describe("frequency ranking", () => {
+  const engine = {
+    suggest: (query: string) => ({
+      words: query === "bari" ? ["বারি", "বারই", "বাড়ি"] : ["আমি", "আমই"],
+      prevSelection: 0,
+    }),
+    commit: () => {},
+    candidate: () => undefined,
+  };
+
+  it("promotes a common word over an alphabetically earlier rare one", () => {
+    const frequency = new Map([
+      ["বারি", 3.59],
+      ["বাড়ি", 5.55],
+    ]);
+    const result = suggestCandidates(engine, "bari", new Map(), frequency);
+    expect(result.candidates[0]?.name).toBe("বাড়ি");
+  });
+
+  it("keeps engine order for words the table does not know", () => {
+    const result = suggestCandidates(engine, "bari", new Map(), new Map());
+    expect(result.candidates[0]?.name).toBe("বারি");
+  });
+
+  it("never lets frequency outrank a remembered choice", () => {
+    const frequency = new Map([["আমই", 9]]);
+    const result = suggestCandidates(
+      { ...engine, candidate: () => "আমই" },
+      "ami",
+      new Map(),
+      frequency,
+    );
+    expect(result.candidates[0]?.name).toBe("আমই");
+  });
+
+  it("never lets frequency outrank an exact alias", () => {
+    const frequency = new Map([["স্মারতফনে", 9]]);
+    const result = suggestCandidates(engine, "smartphone", new Map(), frequency);
+    expect(result.candidates[0]?.name).toBe("স্মার্টফোন");
+  });
+});
+
 describe("word count labels", () => {
   it("uses the singular for one word", () => {
     expect(wordLabel(1)).toBe("1 word");
