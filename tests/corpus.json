@@ -1,0 +1,169 @@
+{
+  "123": {
+    "items": ["১২৩", "123"],
+    "selected": "১২৩",
+    "committed": "১২৩ "
+  },
+  "amar": {
+    "items": ["আমার", "আম্মার", "অ্যাম্বার", "amar"],
+    "selected": "আমার",
+    "committed": "আমার "
+  },
+  "ami": {
+    "items": ["আমি", "আমই", "এমই", "ami"],
+    "selected": "আমি",
+    "committed": "আমি "
+  },
+  "bhalo": {
+    "items": ["ভাল", "ভএল", "ভালো", "ভয়াল", "ভালও", "বহাল", "ভএলও", "ভয়ালও", "বহালও", "bhalo"],
+    "selected": "ভাল",
+    "committed": "ভাল "
+  },
+  "kemon": {
+    "items": ["কেমন", "ক্যামন", "kemon"],
+    "selected": "কেমন",
+    "committed": "কেমন "
+  },
+  "tomake": {
+    "items": ["তমাকে", "তোমাকে", "tomake"],
+    "selected": "তমাকে",
+    "committed": "তমাকে "
+  },
+  "valobashi": {
+    "items": ["ভালবাসি", "ভালোবাসি", "ভালবাশি", "valobashi"],
+    "selected": "ভালবাসি",
+    "committed": "ভালবাসি "
+  },
+  "bangladesh": {
+    "items": ["বাংলাদেশ", "bangladesh"],
+    "selected": "বাংলাদেশ",
+    "committed": "বাংলাদেশ "
+  },
+  "dhaka": {
+    "items": ["ঢাকা", "ধাকা", "dhaka"],
+    "selected": "ঢাকা",
+    "committed": "ঢাকা "
+  },
+  "khabar": {
+    "items": ["খাবার", "khabar"],
+    "selected": "খাবার",
+    "committed": "খাবার "
+  },
+  "kotha": {
+    "items": ["কথা", "কোথা", "কোঠা", "কোঁথা", "kotha"],
+    "selected": "কথা",
+    "committed": "কথা "
+  },
+  "pori": {
+    "items": ["পরি", "পরী", "পড়ি", "পরই", "পঅরই", "পোরই", "পয়রই", "প্রই", "পড়ই", "পোঁরই", "pori"],
+    "selected": "পরি",
+    "committed": "পরি "
+  },
+  "jan": {
+    "items": ["জান", "জাং", "জাঙ", "যান", "যাঙ", "jan"],
+    "selected": "জান",
+    "committed": "জান "
+  },
+  "janbona": {
+    "items": ["জানবনা", "janbona"],
+    "selected": "জানবনা",
+    "committed": "জানবনা "
+  },
+  "keno": {
+    "items": ["কেন", "কয়েন", "কেনও", "কয়েনও", "ক্যান", "ক্যানও", "keno"],
+    "selected": "কেন",
+    "committed": "কেন "
+  },
+  "kobe": {
+    "items": ["কবে", "কব্যে", "kobe"],
+    "selected": "কবে",
+    "committed": "কবে "
+  },
+  "jodi": {
+    "items": ["যদি", "জদি", "jodi"],
+    "selected": "যদি",
+    "committed": "যদি "
+  },
+  "chai": {
+    "items": ["ছাই", "চাই", "ছৈ", "ছ্যাই", "চৈ", "ছ্যাঃই", "চ্যাঁই", "chai"],
+    "selected": "ছাই",
+    "committed": "ছাই "
+  },
+  "chara": {
+    "items": ["ছারা", "চারা", "ছাড়া", "চাড়া", "ছ্যারা", "চাঁড়া", "ছ্যাঃরা", "চ্যাঁরা", "chara"],
+    "selected": "ছারা",
+    "committed": "ছারা "
+  },
+  "sara": {
+    "items": ["সারা", "সাড়া", "সাঁরা", "সয়ারা", "শারা", "শাঁরা", "শাঁড়া", "ষাঁড়া", "শ্বারা", "sara"],
+    "selected": "সারা",
+    "committed": "সারা "
+  },
+  "obichol": {
+    "items": ["অবিচল", "অবিছল", "obichol"],
+    "selected": "অবিচল",
+    "committed": "অবিচল "
+  },
+  "onno": {
+    "items": [
+      "অন্ন",
+      "অন্য",
+      "অহ্ন",
+      "অন্নও",
+      "অনন্য",
+      "অন্বয়",
+      "অন্যও",
+      "অহ্নও",
+      "অনন্বয়",
+      "অনন্যও",
+      "onno"
+    ],
+    "selected": "অন্ন",
+    "committed": "অন্ন "
+  },
+  "protidin": {
+    "items": ["প্রতিদিন", "protidin"],
+    "selected": "প্রতিদিন",
+    "committed": "প্রতিদিন "
+  },
+  "somoy": {
+    "items": ["সময়", "সোময়", "সময়য়", "শময়", "শম্বয়", "somoy"],
+    "selected": "সময়",
+    "committed": "সময় "
+  },
+  "dorkar": {
+    "items": ["দরকার", "দোরকার", "দড়কার", "dorkar"],
+    "selected": "দরকার",
+    "committed": "দরকার "
+  },
+  "lagbe": {
+    "items": ["লাগবে", "lagbe"],
+    "selected": "লাগবে",
+    "committed": "লাগবে "
+  },
+  "hail": {
+    "items": ["হাইল", "hail"],
+    "selected": "হাইল",
+    "committed": "হাইল "
+  },
+  "abc123": {
+    "items": ["আবচ১২৩", "abc123"],
+    "selected": "আবচ১২৩",
+    "committed": "আবচ১২৩ "
+  },
+  "amar bhai": {
+    "items": ["ভাই", "ভআই", "বহাই", "ভআঁই", "ভ্যাই", "bhai"],
+    "selected": "ভাই",
+    "committed": "আমার ভাই "
+  },
+  "ami tomake bhalobashi": {
+    "items": ["ভালবাসি", "ভালোবাসি", "ভালবাশি", "bhalobashi"],
+    "selected": "ভালবাসি",
+    "committed": "আমি তমাকে ভালবাসি "
+  },
+  "আমার amar": {
+    "items": ["আমার", "আম্মার", "অ্যাম্বার", "amar"],
+    "selected": "আমার",
+    "committed": "আমার আমার "
+  }
+}

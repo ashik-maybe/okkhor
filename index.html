@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f7f0" />
+    <meta
+      name="description"
+      content="Okkhor is a private, offline Bangla writing studio. Type roman letters, get Bangla words."
+    />
+    <meta property="og:site_name" content="Okkhor" />
+    <meta property="og:title" content="Okkhor — Bangla, typed the way you think" />
+    <meta property="og:url" content="https://ashik-maybe.github.io/okkhor/" />
+    <meta
+      property="og:description"
+      content="A private, offline Bangla writing studio for the browser."
+    />
+    <meta property="og:image" content="https://ashik-maybe.github.io/okkhor/images/og.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Okkhor — Bangla, typed the way you think" />
+    <meta
+      name="twitter:description"
+      content="A private, offline Bangla writing studio for the browser."
+    />
+    <meta name="application-name" content="Okkhor" />
+    <meta name="apple-mobile-web-app-title" content="Okkhor" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="icon" href="%BASE_URL%images/icon-192.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%images/icon-192.png" />
+    <title>Okkhor — Bangla writing</title>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("okkhor-theme") || "system";
+          var d =
+            t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+          if (d) document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#editor">Skip to editor</a>
+    <div id="root"></div>
+    <noscript>Okkhor needs JavaScript to run.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

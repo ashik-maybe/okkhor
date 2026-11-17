@@ -1,0 +1,115 @@
+import { FilePlus2, Search, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { Doc } from "@/lib/db";
+import { cn } from "cn";
+
+interface LibraryProps {
+  docs: Doc[];
+  activeId: number | null;
+  search: string;
+  onSearchChange: (value: string) => void;
+  onSelect: (id: number) => void;
+  onNew: () => void;
+  onDelete: (id: number) => void;
+}
+
+function relativeDate(timestamp: number): string {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString("bn-BD");
+}
+
+export function Library({
+  docs,
+  activeId,
+  search,
+  onSearchChange,
+  onSelect,
+  onNew,
+  onDelete,
+}: LibraryProps) {
+  const query = search.trim().toLowerCase();
+  const visible = query
+    ? docs.filter(
+        (doc) =>
+          doc.title.toLowerCase().includes(query) || doc.content.toLowerCase().includes(query),
+      )
+    : docs;
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="border-b border-border px-4 pb-4 pt-5">
+        <p className="font-bangla text-2xl leading-none text-foreground">অক্ষর</p>
+        <p className="mt-1 text-xs text-muted-foreground">Bangla writing studio</p>
+        <Button className="mt-4 w-full justify-start" onClick={onNew}>
+          <FilePlus2 />
+          New document
+        </Button>
+        <div className="relative mt-3">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Search drafts"
+            aria-label="Search documents"
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      <nav aria-label="Documents" className="min-h-0 flex-1 overflow-y-auto p-2">
+        {visible.length === 0 ? (
+          <p className="px-3 py-6 text-center text-sm text-muted-foreground">
+            {docs.length === 0 ? "No drafts yet. Start one." : "Nothing matched your search."}
+          </p>
+        ) : (
+          <ul className="space-y-1">
+            {visible.map((doc) => (
+              <li key={doc.id} className="group relative">
+                <button
+                  type="button"
+                  onClick={() => onSelect(doc.id!)}
+                  aria-current={doc.id === activeId ? "page" : undefined}
+                  className={cn(
+                    "flex w-full flex-col items-start gap-1 rounded-md px-3 py-2.5 text-left transition-colors",
+                    doc.id === activeId
+                      ? "bg-secondary text-secondary-foreground"
+                      : "hover:bg-muted/70",
+                  )}
+                >
+                  <span className="line-clamp-1 w-full text-sm font-medium">{doc.title}</span>
+                  <span className="line-clamp-1 w-full font-bangla text-xs text-muted-foreground">
+                    {doc.content.replace(/\s+/g, " ").trim() || "Empty draft"}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {relativeDate(doc.updatedAt)}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Delete ${doc.title}`}
+                  title="Delete document"
+                  onClick={() => onDelete(doc.id!)}
+                  className="absolute right-2 top-2 hidden size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive hover:text-destructive-foreground focus-visible:flex group-hover:flex"
+                >
+                  <Trash2 className="size-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </nav>
+
+      <div className="border-t border-border px-4 py-3 text-[11px] text-muted-foreground">
+        Saved on this device · nothing leaves the browser
+      </div>
+    </div>
+  );
+}
