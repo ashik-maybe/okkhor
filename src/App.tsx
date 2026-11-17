@@ -47,9 +47,10 @@ import {
 import { loadBanglaMode, saveBanglaMode } from "@/lib/preferences";
 import { downloadText, safeFilename, toHtml } from "@/lib/export";
 import { GITHUB_URL } from "@/lib/links";
+import { wordLabel } from "@/lib/text";
 
 const BRAND_ICON = `${import.meta.env.BASE_URL}images/logo.svg`;
-const wordCount = (text: string) => (text.trim() ? text.trim().split(/\s+/).length : 0);
+const countDraftWords = (text: string) => (text.trim() ? text.trim().split(/\s+/).length : 0);
 const CommandPalette = lazy(async () => {
   const module = await import("@/features/command/CommandPalette");
   return { default: module.CommandPalette };
@@ -409,8 +410,9 @@ export function App() {
               <DropdownMenuLabel className="truncate font-bangla text-base">
                 {activeDoc?.title ?? "Untitled draft"}
               </DropdownMenuLabel>
-              <DropdownMenuLabel className="font-normal text-muted-foreground">
-                {wordCount(activeDoc?.content ?? "")} words · {personalWords.size} personal words
+              <DropdownMenuLabel className="font-normal text-muted-foreground tabular-nums">
+                {wordLabel(countDraftWords(activeDoc?.content ?? ""))} · {personalWords.size}{" "}
+                personal words
               </DropdownMenuLabel>
               <DropdownMenuLabel className="font-normal text-muted-foreground">
                 Updated {new Date(activeDoc?.updatedAt ?? Date.now()).toLocaleString("en-GB")}

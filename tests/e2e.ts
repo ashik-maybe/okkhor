@@ -51,6 +51,20 @@ try {
     ),
   );
   check("writing measure is capped", ((await editor.boundingBox())?.width ?? 0) <= 900);
+  check(
+    "focus does not paint a rule on the paper",
+    await editor.evaluate((node) => !getComputedStyle(node).boxShadow.includes("inset")),
+  );
+  const paperRule = await editor.evaluate(
+    (node) => getComputedStyle(node.parentElement!).borderTopColor,
+  );
+  await editor.click();
+  check(
+    "focused paper gets a hairline",
+    paperRule !==
+      (await editor.evaluate((node) => getComputedStyle(node.parentElement!).borderTopColor)),
+    paperRule,
+  );
   for (const [name, asset] of [
     ["favicon", "favicon.ico"],
     ["logo", "images/logo.svg"],
@@ -219,6 +233,28 @@ try {
       (await page.locator(`#${activeOption}`).getAttribute("aria-selected")) === "true",
     activeOption,
   );
+  const selectedText = () =>
+    page.evaluate(
+      () => document.querySelector('[role=option][aria-selected="true"]')?.textContent ?? "",
+    );
+  for (let i = 0; i < 6 && !(await selectedText()).includes("as typed"); i += 1) {
+    await editor.press("ArrowDown");
+  }
+  await page.waitForTimeout(150);
+  const asTyped = await page.evaluate(() => {
+    const row = document.querySelector('[role=option][aria-selected="true"]');
+    return {
+      ok:
+        Boolean(row?.textContent?.includes("as typed")) &&
+        getComputedStyle(row!).color === "rgb(251, 251, 249)",
+      text: row?.textContent,
+      color: row ? getComputedStyle(row).color : null,
+    };
+  });
+  check("the as-typed row stays readable when selected", asTyped.ok, asTyped);
+  for (let i = 0; i < 6 && !(await selectedText()).includes("আমার"); i += 1) {
+    await editor.press("ArrowUp");
+  }
   check(
     "candidate option ids are unique",
     await page.evaluate(() => {
@@ -401,6 +437,15 @@ try {
       .getByRole("link", { name: "View source on GitHub" })
       .isVisible()),
   );
+  await mobilePage.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await mobilePage.keyboard.press("?");
+  const closeBox = await mobilePage.getByRole("button", { name: "Close" }).boundingBox();
+  check("dialog close target is at least 44px on touch", (closeBox?.height ?? 0) >= 44, closeBox);
+  check(
+    "help opens without focusing a tab",
+    await mobilePage.evaluate(() => document.activeElement?.getAttribute("aria-pressed") === null),
+  );
+  await mobilePage.keyboard.press("Escape");
   const titleWidth = (await mobilePage.getByRole("textbox", { name: "Draft title" }).boundingBox())
     ?.width;
   check("draft title is legible on a phone", (titleWidth ?? 0) >= 120, titleWidth);

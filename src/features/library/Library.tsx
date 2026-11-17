@@ -59,7 +59,7 @@ export function Library({
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search drafts"
             aria-label="Search documents"
-            className="pl-9"
+            className="bg-input/30 pl-9"
           />
         </div>
       </div>

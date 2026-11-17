@@ -41,7 +41,14 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[min(85vh,720px)] flex-col gap-4 p-5 sm:max-w-3xl sm:p-6">
+      <DialogContent
+        tabIndex={-1}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          (event.currentTarget as HTMLElement).focus();
+        }}
+        className="flex h-[min(85vh,720px)] flex-col gap-4 p-5 sm:max-w-3xl sm:p-6"
+      >
         <DialogHeader className="text-left">
           <DialogTitle>Help</DialogTitle>
           <DialogDescription>Write Bangla without memorising a keyboard.</DialogDescription>
@@ -63,7 +70,7 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
               type="button"
               aria-pressed={tab === value}
               onClick={() => onTabChange(value)}
-              className={`min-h-[44px] rounded-sm px-3 text-sm font-medium transition-colors sm:min-h-9 ${
+              className={`min-h-[44px] rounded-sm px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:min-h-9 ${
                 tab === value
                   ? "bg-background text-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -96,6 +103,7 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
             <Input
               aria-label="Filter Avro keymap"
               placeholder="Filter by key or letter…"
+              className="bg-input/30"
               value={filter}
               onChange={(event) => setFilter(event.target.value)}
             />

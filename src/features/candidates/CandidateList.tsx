@@ -45,19 +45,23 @@ export function CandidateList({
           className={cn(
             "flex min-h-11 shrink-0 cursor-pointer items-center rounded-md px-3 text-base font-medium transition-colors duration-100 sm:w-full sm:justify-between sm:text-sm",
             index === selectedIndex
-              ? cn(
-                  "bg-primary text-primary-foreground",
-                  candidate.name === rawQuery ? "sm:text-base" : "sm:text-lg",
-                )
+              ? "bg-primary text-primary-foreground"
               : "bg-muted/60 text-foreground hover:bg-muted",
-            candidate.name === rawQuery && "text-muted-foreground",
+            candidate.name === rawQuery && index !== selectedIndex && "text-muted-foreground",
           )}
         >
           <span className="truncate font-bangla">{candidate.name}</span>
           {candidate.name === rawQuery ? (
-            <span className="ml-3 hidden text-xs opacity-70 sm:inline">as typed</span>
+            <span
+              className={cn(
+                "ml-3 hidden text-xs sm:inline",
+                index === selectedIndex ? "text-primary-foreground/90" : "opacity-70",
+              )}
+            >
+              as typed
+            </span>
           ) : index === selectedIndex ? (
-            <span className="ml-3 hidden text-xs opacity-70 sm:inline">Space</span>
+            <span className="ml-3 hidden text-xs text-primary-foreground/90 sm:inline">Space</span>
           ) : null}
         </li>
       ))}

@@ -3,6 +3,7 @@ import { extractToken, suggestCandidates } from "../src/lib/avro-service";
 import { commitSuffix } from "../src/lib/typing";
 import { makeTitle } from "../src/lib/documents";
 import { safeFilename, toHtml } from "../src/lib/export";
+import { wordLabel } from "../src/lib/text";
 
 describe("token extraction", () => {
   it("finds the trailing roman token in Bangla mode", () => {
@@ -57,6 +58,17 @@ describe("candidate ranking", () => {
   it("keeps the raw query as a fallback option", () => {
     const result = suggestCandidates(engine, "ami", new Map());
     expect(result.candidates.at(-1)?.name).toBe("ami");
+  });
+});
+
+describe("word count labels", () => {
+  it("uses the singular for one word", () => {
+    expect(wordLabel(1)).toBe("1 word");
+  });
+
+  it("uses the plural for zero and many", () => {
+    expect(wordLabel(0)).toBe("0 words");
+    expect(wordLabel(12)).toBe("12 words");
   });
 });
 

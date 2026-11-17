@@ -10,6 +10,7 @@ import { commitSuffix } from "@/lib/typing";
 import { CandidateList } from "@/features/candidates/CandidateList";
 import { ModeSwitch } from "@/components/mode-switch";
 import { hasSeenHints, markHintsSeen } from "@/lib/preferences";
+import { wordLabel } from "@/lib/text";
 
 interface EditorProps {
   docId: number;
@@ -257,7 +258,7 @@ export function Editor({
   return (
     <section className="relative flex min-h-0 flex-1 flex-col" aria-label="Writing surface">
       <div className="mx-auto flex w-full max-w-[820px] flex-1 flex-col px-3 pb-28 pt-4 [@media(max-height:700px)]:pb-10 [@media(max-height:700px)]:pt-2 sm:px-8 sm:pb-10 sm:pt-8">
-        <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/70 bg-card/70 px-5 py-5 shadow-sm [@media(max-height:700px)]:py-3 sm:px-10 sm:py-8 xl:px-12">
+        <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/70 bg-card/70 px-5 py-5 shadow-sm transition-colors focus-within:border-primary/60 [@media(max-height:700px)]:py-3 sm:px-10 sm:py-8 xl:px-12">
           <div className="mx-auto mb-5 flex w-full max-w-[66ch] flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-3 [@media(max-height:700px)]:mb-2">
             <div>
               <div className="flex items-center gap-3">
@@ -280,7 +281,7 @@ export function Editor({
               ) : null}
             </div>
             <div className="flex min-w-0 flex-wrap items-center justify-end gap-x-2 text-xs text-right text-muted-foreground">
-              <span className="tabular-nums">{countWords(content)} words</span>
+              <span className="tabular-nums">{wordLabel(countWords(content))}</span>
               <span className="hidden sm:inline">·</span>
               <span>
                 {saveState === "saving"
