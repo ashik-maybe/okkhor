@@ -38,12 +38,11 @@ try {
   const editor = await openEditor(page);
 
   check("editor is visible", await editor.isVisible());
-  const skipLink = page.locator(".skip-link");
-  const skipWidth = () => skipLink.evaluate((element) => element.getBoundingClientRect().width);
-  check("skip link is hidden until focused", (await skipWidth()) <= 1);
-  await skipLink.focus();
-  check("skip link appears on focus", (await skipWidth()) > 1);
-  check("skip link targets the editor", (await skipLink.getAttribute("href")) === "#editor");
+  check("no skip link in the document", (await page.locator(".skip-link").count()) === 0);
+  check(
+    "no 'Skip to editor' text in the document",
+    (await page.getByText("Skip to editor").count()) === 0,
+  );
   check(
     "draft created in IndexedDB",
     await page.evaluate(async () => {
