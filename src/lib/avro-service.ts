@@ -14,6 +14,12 @@ export interface CandidateResult {
   rawQuery: string;
 }
 
+const ENGINE_BASE = 1000;
+const ENGINE_STEP = 10;
+const ALIAS_PREFIX = 100;
+const ALIAS_EXACT = 2000;
+const REMEMBERED = 2500;
+
 export async function loadEngine(): Promise<AvroInstance> {
   const Avro = await loadAvro();
   return new Avro(loadCandidateSelections, saveCandidateSelections);
@@ -36,63 +42,52 @@ export function suggestCandidates(
   max = 20,
 ): CandidateResult {
   const normalizedQuery = query.toLowerCase().normalize("NFC");
-  const pool: Array<{ value: string; index: number }> = [];
-  let index = 0;
+  // Word -> score. The map keeps insertion order for stable tie-breaking.
+  const pool = new Map<string, number>();
+  const add = (value: string, score: number) => {
+    const word = value.normalize("NFC");
+    if (!word) return;
+    pool.set(word, Math.max(pool.get(word) ?? Number.NEGATIVE_INFINITY, score));
+  };
 
+  let words: string[] = [];
   try {
     const suggestion = engine.suggest(query);
-    for (const word of suggestion.words) {
-      pool.push({ value: word.normalize("NFC"), index: index++ });
-    }
-    if (typeof suggestion.prevSelection === "number" && suggestion.prevSelection >= 0) {
-      // preserve the engine's preferred selection as a hint via index 0 fallback
-    }
+    words = suggestion.words;
   } catch {
-    // Fall through to alias/personal candidates.
+    // The alias layer still works if the engine rejects a query.
+  }
+
+  for (const [index, word] of words.entries()) {
+    add(word, ENGINE_BASE - index * ENGINE_STEP);
+  }
+
+  // The engine remembers the word the user last picked for this query.
+  try {
+    const remembered = engine.candidate(query);
+    if (remembered) add(remembered, REMEMBERED);
+  } catch {
+    // Ignore a missing preference store.
   }
 
   for (const [key, value] of Object.entries(MODERN_ALIASES)) {
-    const canonical = value.normalize("NFC");
     if (key === normalizedQuery) {
-      pool.push({ value: canonical, index: index++ });
+      add(value, ALIAS_EXACT);
     } else if (key.startsWith(normalizedQuery) || normalizedQuery.startsWith(key)) {
-      pool.push({ value: canonical, index: index++ });
+      add(value, ALIAS_PREFIX);
     }
   }
 
-  for (const word of personalWords.keys()) {
-    pool.push({ value: word.normalize("NFC"), index: index++ });
-  }
+  // Personal frequency only nudges candidates that are already relevant.
+  // Injecting remembered words here used to flood the list and outrank the
+  // word the user was actually typing.
+  const scored = Array.from(pool, ([name, score]) => ({
+    name,
+    score: score + Math.min(personalWords.get(name) ?? 0, 5),
+  }));
+  scored.sort((a, b) => b.score - a.score);
 
-  const seen = new Set<string>();
-  const unique = pool.filter((item) => {
-    if (seen.has(item.value)) return false;
-    seen.add(item.value);
-    return true;
-  });
-
-  const scored = unique.map((item) => {
-    let score = 0;
-    if (MODERN_ALIASES[normalizedQuery] === item.value) score += 100;
-    const personalCount = personalWords.get(item.value) ?? 0;
-    if (personalCount > 0) score += 10 + personalCount * 2;
-    for (const [key, value] of Object.entries(MODERN_ALIASES)) {
-      if (
-        value === item.value &&
-        (key.startsWith(normalizedQuery) || normalizedQuery.startsWith(key))
-      ) {
-        score += 5;
-      }
-    }
-    // Prefer shorter candidate lists' natural engine order via negative index.
-    score += Math.max(0, 5 - item.index * 0.01);
-    return { item, score };
-  });
-
-  scored.sort((a, b) => b.score - a.score || a.item.index - b.item.index);
-
-  const candidates = scored.slice(0, max).map((entry, id) => ({ id, name: entry.item.value }));
-
+  const candidates = scored.slice(0, max).map((entry, id) => ({ id, name: entry.name }));
   if (!candidates.some((candidate) => candidate.name === query)) {
     candidates.push({ id: candidates.length, name: query });
   }

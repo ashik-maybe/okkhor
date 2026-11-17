@@ -25,7 +25,7 @@ export function CandidateList({
       role="listbox"
       aria-label="Bangla word suggestions"
       aria-activedescendant={`candidate-${selectedIndex}`}
-      className="flex max-h-72 gap-1.5 overflow-x-auto overscroll-x-contain p-2 sm:max-h-none sm:min-w-56 sm:flex-col sm:overflow-visible sm:rounded-lg sm:border sm:bg-popover sm:p-1.5 sm:shadow-xl"
+      className="pointer-events-auto flex max-h-72 gap-1.5 overflow-x-auto overscroll-x-contain p-2 sm:max-h-none sm:min-w-56 sm:flex-col sm:overflow-visible sm:rounded-lg sm:border sm:bg-popover sm:p-1.5 sm:shadow-xl"
     >
       {candidates.map((candidate, index) => (
         <li
@@ -51,7 +51,7 @@ export function CandidateList({
           >
             <span className="truncate font-bangla">{candidate.name}</span>
             {index === selectedIndex ? (
-              <span className="ml-3 hidden text-xs opacity-70 sm:inline">Tab</span>
+              <span className="ml-3 hidden text-xs opacity-70 sm:inline">Space</span>
             ) : null}
           </button>
         </li>
@@ -68,7 +68,7 @@ export function CandidateList({
           left: position?.left ?? 0,
         }}
       >
-        <div className="pointer-events-auto border-l-2 border-primary pl-0.5">{renderList()}</div>
+        <div className="border-l-2 border-primary pl-0.5">{renderList()}</div>
       </div>
       <div className="fixed inset-x-0 z-40 border-t border-border bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+var(--keyboard-inset,0px))] pt-2 backdrop-blur sm:hidden">
         {renderList()}

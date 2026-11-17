@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { toast } from "sonner";
-import { Download, Languages, Menu, Moon, Search, Sun, Upload } from "lucide-react";
+import { Check, Download, Languages, Menu, Moon, Search, Sun, Upload } from "lucide-react";
+import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,7 +43,7 @@ export function App() {
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [ready, setReady] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
 
   const activeDoc = useMemo(
     () => docs.find((doc) => doc.id === activeId) ?? docs[0],
@@ -230,13 +230,32 @@ export function App() {
         />
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-          <span className="hidden text-xs text-muted-foreground sm:inline">Bangla</span>
-          <Switch
-            checked={banglaMode}
-            onCheckedChange={toggleLanguage}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={banglaMode}
             aria-label="Toggle Bangla and English input"
-          />
-          <span className="hidden text-xs text-muted-foreground sm:inline">English</span>
+            title={banglaMode ? "Bangla phonetic input" : "English input"}
+            onClick={toggleLanguage}
+            className="relative h-9 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-muted/60"
+          >
+            <span
+              className={cn(
+                "absolute inset-0 flex items-center text-xs font-bold text-muted-foreground/80",
+                banglaMode ? "justify-end pr-3" : "justify-start pl-3",
+              )}
+            >
+              {banglaMode ? "EN" : "বাং"}
+            </span>
+            <span
+              className={cn(
+                "absolute left-0.5 top-0.5 flex size-7 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground shadow-sm transition-transform duration-200 ease-out",
+                banglaMode ? "translate-x-0" : "translate-x-11",
+              )}
+            >
+              {banglaMode ? "বাং" : "EN"}
+            </span>
+          </button>
 
           <Button
             variant="ghost"
@@ -250,14 +269,22 @@ export function App() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Change theme">
-                {theme === "dark" ? <Moon /> : <Sun />}
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Change theme"
+                title={`Theme: ${theme}`}
+              >
+                {resolvedTheme === "dark" ? <Moon /> : <Sun />}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>Light</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
+              {(["light", "dark", "system"] as const).map((option) => (
+                <DropdownMenuItem key={option} onClick={() => setTheme(option)}>
+                  <Check className={cn("size-4", theme === option ? "opacity-100" : "opacity-0")} />
+                  {option[0].toUpperCase() + option.slice(1)}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

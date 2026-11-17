@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { extractToken } from "../src/lib/avro-service";
+import { extractToken, suggestCandidates } from "../src/lib/avro-service";
+import { commitSuffix } from "../src/lib/typing";
 import { makeTitle } from "../src/lib/documents";
 import { safeFilename, toHtml } from "../src/lib/export";
 
@@ -11,6 +12,51 @@ describe("token extraction", () => {
   it("returns null in English mode and for Bangla endings", () => {
     expect(extractToken("amar", false)).toBeNull();
     expect(extractToken("আমি", true)).toBeNull();
+  });
+});
+
+describe("commit keys", () => {
+  it("commits on word-ending keys only when candidates are visible", () => {
+    expect(commitSuffix(" ", true)).toBe(" ");
+    expect(commitSuffix("Tab", true)).toBe(" ");
+    expect(commitSuffix("Enter", true)).toBe(" ");
+    expect(commitSuffix("।", true)).toBe("।");
+    expect(commitSuffix(".", true)).toBe(".");
+    expect(commitSuffix("a", true)).toBeNull();
+    expect(commitSuffix(" ", false)).toBeNull();
+  });
+});
+
+describe("candidate ranking", () => {
+  const engine = {
+    suggest: (query: string) => ({
+      words: query === "ami" ? ["আমি", "আমই", "এমই"] : ["স্মারতফনে"],
+      prevSelection: 0,
+    }),
+    commit: () => {},
+    candidate: () => undefined,
+  };
+
+  it("does not let remembered words outrank the typed word", () => {
+    const result = suggestCandidates(engine, "ami", new Map([["ভাল", 3]]));
+    expect(result.candidates[0]?.name).toBe("আমি");
+    expect(result.candidates.map((item) => item.name)).not.toContain("ভাল");
+    expect(result.candidates[1]?.name).toBe("আমই");
+  });
+
+  it("prefers an exact modern alias over the legacy engine result", () => {
+    const result = suggestCandidates(engine, "smartphone", new Map());
+    expect(result.candidates[0]?.name).toBe("স্মার্টফোন");
+  });
+
+  it("front-loads a word the user picked before", () => {
+    const result = suggestCandidates({ ...engine, candidate: () => "আমই" }, "ami", new Map());
+    expect(result.candidates[0]?.name).toBe("আমই");
+  });
+
+  it("keeps the raw query as a fallback option", () => {
+    const result = suggestCandidates(engine, "ami", new Map());
+    expect(result.candidates.at(-1)?.name).toBe("ami");
   });
 });
 
