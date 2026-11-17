@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Okkhor is a private, offline Bangla writing studio with a modern phonetic keyboard.",
+  "license": "MIT",
   "author": "Ashik",
   "repository": "git://github.com/ashik-maybe/okkhor",
   "type": "module",

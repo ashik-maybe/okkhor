@@ -71,4 +71,12 @@ Push to `main`. The workflow typechecks, lints, checks formatting, runs unit and
 
 ## Licensing
 
-`src/engine/avro.min.js` is the original OmicronLab 2013 engine and remains under MPL-1.1. `src/data/word-frequency.tsv` is derived from wordfreq's Bengali data and is licensed CC BY-SA 4.0; see `public/licenses/wordfreq.md` and regenerate it with `python3 scripts/build-word-frequency.py`. The alias data and new application code are original work. A repository-level license has not been chosen yet.
+Okkhor's original application code, alias data, keymap and brand assets are licensed under the MIT License; see `LICENSE`.
+
+Third-party material keeps its own licence and is **not** covered by the repository's MIT licence:
+
+- `src/engine/avro.min.js` — the original OmicronLab 2013 engine, **MPL-1.1**.
+- `src/data/word-frequency.tsv` — derived from wordfreq's Bengali data, **CC BY-SA 4.0**. See `public/licenses/wordfreq.md`; regenerate it with `python3 scripts/build-word-frequency.py`.
+- The brand glyph outline is derived from Noto Sans Bengali, **SIL Open Font License 1.1**.
+
+Bundled npm dependencies retain their respective licences as declared in their packages.
