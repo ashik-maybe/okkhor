@@ -97,7 +97,7 @@ export function Library({
                   aria-label={`Delete ${doc.title}`}
                   title="Delete document"
                   onClick={() => onDelete(doc.id!)}
-                  className="absolute right-1 top-1 flex size-11 items-center justify-center rounded-md text-muted-foreground opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground focus-visible:opacity-100 sm:right-2 sm:top-2 sm:size-8 sm:opacity-0 sm:group-hover:opacity-100"
+                  className="absolute right-1 top-1 flex size-[44px] items-center justify-center rounded-md text-muted-foreground opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground focus-visible:opacity-100 sm:right-2 sm:top-2 sm:size-8 sm:opacity-0 sm:group-hover:opacity-100"
                 >
                   <Trash2 className="size-4" />
                 </button>

@@ -433,6 +433,74 @@ try {
     })),
   );
   await mobile.close();
+
+  const measure = async (width: number, height: number) => {
+    const context = await browser.newContext({ viewport: { width, height } });
+    const page = await context.newPage();
+    await openEditor(page);
+    await page.waitForTimeout(200);
+    const result = await page.evaluate(() => {
+      const editor = document.querySelector("#editor")!;
+      const card = editor.parentElement!;
+      const menu = document.querySelector('[aria-label="Open drafts"]');
+      const aside = document.querySelector("aside");
+      return {
+        x: document.documentElement.scrollWidth - window.innerWidth,
+        y: document.documentElement.scrollHeight - window.innerHeight,
+        editor: Math.round(editor.getBoundingClientRect().width),
+        card: Math.round(card.getBoundingClientRect().width),
+        title: Math.round(
+          document.querySelector('[aria-label="Draft title"]')!.getBoundingClientRect().width,
+        ),
+        menu: Boolean(menu && menu.getBoundingClientRect().height > 0),
+        aside: Boolean(aside && getComputedStyle(aside).display !== "none"),
+      };
+    });
+    await context.close();
+    return result;
+  };
+
+  for (const [width, height] of [
+    [320, 568],
+    [390, 844],
+    [768, 1024],
+    [1024, 768],
+    [1440, 900],
+    [1920, 1080],
+    [844, 390],
+  ]) {
+    const size = await measure(width, height);
+    check(`${width}x${height} has no horizontal overflow`, size.x === 0, size);
+  }
+
+  const small = await measure(320, 568);
+  check("320px keeps the draft title readable", small.title >= 90, small);
+  check("320px writing surface fits the viewport", small.y === 0, small);
+
+  const tablet = await measure(768, 1024);
+  check("tablet portrait keeps the drafts in a sheet", tablet.menu && !tablet.aside, tablet);
+  check("tablet portrait has a usable writing column", tablet.editor >= 600, tablet);
+
+  const desktop = await measure(1920, 1080);
+  check("large screens grow the paper surface", desktop.card >= 700, desktop);
+  check("large screens keep the measure capped", desktop.editor <= 900, desktop);
+  check("large screens show the sidebar", desktop.aside && !desktop.menu, desktop);
+
+  const landscape = await measure(844, 390);
+  check("phone landscape fits without page scroll", landscape.y === 0, landscape);
+
+  const zoomed = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const zoomPage = await zoomed.newPage();
+  await openEditor(zoomPage);
+  await zoomPage.evaluate(() => {
+    document.documentElement.style.fontSize = "32px";
+  });
+  await zoomPage.waitForTimeout(200);
+  check(
+    "200% text does not break the phone layout",
+    await zoomPage.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1),
+  );
+  await zoomed.close();
 } finally {
   await browser.close();
 }

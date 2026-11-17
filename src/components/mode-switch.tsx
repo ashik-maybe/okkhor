@@ -27,8 +27,8 @@ export function ModeSwitch({ banglaMode, onToggle, className }: ModeSwitchProps)
       </span>
       <span
         className={cn(
-          "absolute left-0.5 top-0.5 flex size-8 items-center justify-center rounded-full bg-primary text-caption font-bold text-primary-foreground shadow-sm transition-transform duration-normal ease-out active:scale-95 sm:size-7",
-          banglaMode ? "translate-x-0" : "translate-x-10 sm:translate-x-11",
+          "absolute left-0.5 top-0.5 flex size-[32px] items-center justify-center rounded-full bg-primary text-caption font-bold text-primary-foreground shadow-sm transition-transform duration-normal ease-out active:scale-95 sm:size-7",
+          banglaMode ? "translate-x-0" : "translate-x-[40px] sm:translate-x-11",
         )}
       >
         {banglaMode ? "বাং" : "EN"}

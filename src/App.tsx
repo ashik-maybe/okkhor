@@ -334,14 +334,14 @@ export function App() {
   );
 
   return (
-    <div className="flex h-dvh min-h-[480px] flex-col bg-background text-foreground">
-      <header className="flex min-h-14 shrink-0 items-center gap-1.5 border-b border-border px-3 py-1.5 sm:gap-2 sm:px-4">
+    <div className="flex h-dvh flex-col bg-background text-foreground">
+      <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-1.5 border-b border-border px-3 py-1.5 sm:gap-2 sm:px-4">
         <Sheet open={libraryOpen} onOpenChange={setLibraryOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="size-11 md:hidden sm:size-9"
+              className="size-[44px] lg:hidden sm:size-9"
               aria-label="Open drafts"
             >
               <Menu />
@@ -377,7 +377,7 @@ export function App() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-11 sm:size-9"
+            className="size-[44px] sm:size-9"
             aria-label="Open command palette"
             title="Command palette (Ctrl+K)"
             onClick={() => setCommandOpen(true)}
@@ -390,7 +390,7 @@ export function App() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-11 sm:size-9"
+                className="size-[44px] sm:size-9"
                 aria-label="Document actions"
                 title="Document"
               >
@@ -430,7 +430,7 @@ export function App() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-11 sm:size-9"
+                className="size-[44px] sm:size-9"
                 aria-label="Change theme"
                 title={`Theme: ${theme}`}
               >
@@ -450,11 +450,11 @@ export function App() {
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-72 shrink-0 border-r border-border bg-card md:block">
+        <aside className="hidden w-72 shrink-0 border-r border-border bg-card lg:block">
           {library}
         </aside>
 
-        <main className="flex min-w-0 flex-1 flex-col">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col">
           <Editor
             docId={activeDoc?.id ?? 0}
             content={activeDoc?.content ?? ""}

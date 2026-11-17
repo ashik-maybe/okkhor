@@ -61,7 +61,7 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
               type="button"
               aria-pressed={tab === value}
               onClick={() => onTabChange(value)}
-              className={`min-h-11 rounded-sm px-3 text-sm font-medium transition-colors sm:min-h-9 ${
+              className={`min-h-[44px] rounded-sm px-3 text-sm font-medium transition-colors sm:min-h-9 ${
                 tab === value
                   ? "bg-background text-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -124,7 +124,7 @@ export function HelpDialog({ open, onOpenChange, tab, onTabChange }: HelpDialogP
                           type="button"
                           onClick={() => copyKey(entry.keys)}
                           title={`Copy ${entry.keys}`}
-                          className="flex min-h-11 items-center justify-between gap-2 rounded-md border border-border/70 bg-muted/30 px-2.5 py-2 text-left transition-colors hover:border-primary hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
+                          className="flex min-h-[44px] items-center justify-between gap-2 rounded-md border border-border/70 bg-muted/30 px-2.5 py-2 text-left transition-colors hover:border-primary hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           <span className="font-bangla text-lg leading-none">{entry.glyph}</span>
                           <span className="min-w-0 text-right">

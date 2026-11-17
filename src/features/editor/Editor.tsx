@@ -256,9 +256,9 @@ export function Editor({
 
   return (
     <section className="relative flex min-h-0 flex-1 flex-col" aria-label="Writing surface">
-      <div className="mx-auto flex w-full max-w-[66ch] flex-1 flex-col px-3 pb-28 pt-4 sm:px-8 sm:pb-10 sm:pt-8">
-        <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/70 bg-card/70 px-5 py-5 shadow-sm sm:px-10 sm:py-8">
-          <div className="mb-5 flex items-baseline justify-between gap-4 border-b border-border pb-3">
+      <div className="mx-auto flex w-full max-w-[820px] flex-1 flex-col px-3 pb-28 pt-4 [@media(max-height:700px)]:pb-10 [@media(max-height:700px)]:pt-2 sm:px-8 sm:pb-10 sm:pt-8">
+        <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-border/70 bg-card/70 px-5 py-5 shadow-sm [@media(max-height:700px)]:py-3 sm:px-10 sm:py-8 xl:px-12">
+          <div className="mx-auto mb-5 flex w-full max-w-[66ch] flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border pb-3 [@media(max-height:700px)]:mb-2">
             <div>
               <div className="flex items-center gap-3">
                 <p className="text-xs font-semibold tracking-wide text-muted-foreground">
@@ -279,7 +279,7 @@ export function Editor({
                 </p>
               ) : null}
             </div>
-            <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex min-w-0 flex-wrap items-center justify-end gap-x-2 text-xs text-right text-muted-foreground">
               <span className="tabular-nums">{countWords(content)} words</span>
               <span className="hidden sm:inline">·</span>
               <span>
@@ -314,7 +314,7 @@ export function Editor({
             autoComplete="off"
             autoCorrect="off"
             placeholder={banglaMode ? "এখানে লিখুন…" : "Start writing…"}
-            className="editor-input min-h-[45vh] w-full flex-1 resize-none break-words bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-editor"
+            className="editor-input min-h-[45vh] w-full max-w-[66ch] flex-1 resize-none break-words self-center bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground [@media(max-height:700px)]:min-h-[30vh] sm:text-editor"
             onCompositionStart={() => {
               composingRef.current = true;
             }}
@@ -334,7 +334,7 @@ export function Editor({
             onBlur={() => window.setTimeout(hide, 120)}
           />
           {showIntro ? (
-            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+            <div className="mx-auto mt-4 flex w-full max-w-[66ch] flex-wrap items-center gap-2 border-t border-border pt-4">
               <span className="text-xs text-muted-foreground">Try:</span>
               {[
                 ["ami", "আমি"],
@@ -344,7 +344,7 @@ export function Editor({
                   key={roman}
                   type="button"
                   onClick={() => insertExample(roman, bangla)}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background px-3 text-sm transition-colors hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-background px-3 text-sm transition-colors hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
                 >
                   <span className="font-bangla font-medium">{bangla}</span>
                   <span className="text-xs text-muted-foreground">← {roman}</span>
@@ -353,7 +353,7 @@ export function Editor({
               <button
                 type="button"
                 onClick={onOpenKeymap}
-                className="inline-flex min-h-11 items-center rounded-full border border-transparent px-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-transparent px-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
               >
                 Keymap →
               </button>
