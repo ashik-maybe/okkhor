@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { Copy } from "lucide-react";
 import { cn } from "cn";
 import {
   commitCandidate,
@@ -10,6 +11,7 @@ import type { AvroInstance } from "@/engine";
 import { commitSuffix } from "@/lib/typing";
 import { CandidateList } from "@/features/candidates/CandidateList";
 import { ModeSwitch } from "@/components/mode-switch";
+import { Button } from "@/components/ui/button";
 import { hasSeenHints, markHintsSeen } from "@/lib/preferences";
 import { wordLabel } from "@/lib/text";
 
@@ -24,6 +26,7 @@ interface EditorProps {
   engineError: boolean;
   onToggleMode: () => void;
   onOpenKeymap: () => void;
+  onCopy: () => void;
   onActivate: () => void;
   onChange: (value: string) => void;
   onRememberWord: (word: string) => void;
@@ -107,6 +110,7 @@ export function Editor({
   engineError,
   onToggleMode,
   onOpenKeymap,
+  onCopy,
   onActivate,
   onChange,
   onRememberWord,
@@ -271,6 +275,17 @@ export function Editor({
                   {banglaMode ? "বাংলা" : "English"}
                 </p>
                 <ModeSwitch banglaMode={banglaMode} onToggle={onToggleMode} className="sm:hidden" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-[44px] sm:hidden"
+                  aria-label="Copy everything"
+                  title="Copy everything"
+                  onClick={onCopy}
+                >
+                  <Copy />
+                </Button>
               </div>
               <p id="editor-hint" className="mt-1 text-sm text-muted-foreground">
                 {showIntro

@@ -409,7 +409,7 @@ export function App() {
           <Button
             variant="ghost"
             size="icon"
-            className="size-[44px] sm:size-9"
+            className="hidden size-9 sm:inline-flex"
             aria-label="Copy everything"
             title="Copy everything"
             onClick={() => void copyEverything()}
@@ -527,6 +527,7 @@ export function App() {
             engineError={engineError}
             onToggleMode={toggleLanguage}
             onOpenKeymap={() => openHelp("keymap")}
+            onCopy={() => void copyEverything()}
             onActivate={activateEngine}
             onChange={changeContent}
             onRememberWord={remember}
