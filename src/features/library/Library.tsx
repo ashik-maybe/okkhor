@@ -23,7 +23,7 @@ function relativeDate(timestamp: number): string {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  return new Date(timestamp).toLocaleDateString("bn-BD");
+  return new Date(timestamp).toLocaleDateString("en-GB");
 }
 
 export function Library({
@@ -88,7 +88,7 @@ export function Library({
                   <span className="line-clamp-1 w-full font-bangla text-xs text-muted-foreground">
                     {doc.content.replace(/\s+/g, " ").trim() || "Empty draft"}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-caption text-muted-foreground">
                     {relativeDate(doc.updatedAt)}
                   </span>
                 </button>

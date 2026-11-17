@@ -18,6 +18,7 @@ interface EditorProps {
   personalWords: Map<string, number>;
   mobileCandidates: boolean;
   saveState: "saved" | "saving" | "error";
+  engineError: boolean;
   onActivate: () => void;
   onChange: (value: string) => void;
   onRememberWord: (word: string) => void;
@@ -94,6 +95,7 @@ export function Editor({
   personalWords,
   mobileCandidates,
   saveState,
+  engineError,
   onActivate,
   onChange,
   onRememberWord,
@@ -263,6 +265,11 @@ export function Editor({
                     ? "Space commits · ↑ ↓ to choose"
                     : "Write freely in English."}
               </p>
+              {banglaMode && engineError ? (
+                <p className="mt-1 text-caption text-destructive">
+                  Dictionary unavailable — plain text still works.
+                </p>
+              ) : null}
             </div>
             <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
               <span className="tabular-nums">{countWords(content)} words</span>
@@ -299,7 +306,7 @@ export function Editor({
             autoComplete="off"
             autoCorrect="off"
             placeholder={banglaMode ? "এখানে লিখুন…" : "Start writing…"}
-            className="editor-input min-h-[45vh] w-full flex-1 resize-none break-words bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-[1.625rem]"
+            className="editor-input min-h-[45vh] w-full flex-1 resize-none break-words bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-editor"
             onCompositionStart={() => {
               composingRef.current = true;
             }}

@@ -80,6 +80,27 @@ try {
     await page.getByRole("menuitem", { name: "Clear personal words" }).isVisible(),
   );
   await page.keyboard.press("Escape");
+
+  await page.keyboard.press("Control+k");
+  check("palette can jump to drafts", await page.getByText("Jump to draft").isVisible());
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press("?");
+  check(
+    "shortcuts are discoverable",
+    await page.getByText("Keyboard shortcuts").first().isVisible(),
+  );
+  await page.keyboard.press("Escape");
+  check(
+    "accent follows the green palette, not a stray indigo",
+    await page.evaluate(() => {
+      const value = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+      const hex = value.replace("#", "");
+      if (!/^[0-9a-f]{6}$/i.test(hex)) return false;
+      const [r, g, b] = [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16));
+      return g >= r && g >= b;
+    }),
+  );
   check("no skip link in the document", (await page.locator(".skip-link").count()) === 0);
   check(
     "no 'Skip to editor' text in the document",

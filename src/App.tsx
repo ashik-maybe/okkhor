@@ -4,6 +4,13 @@ import { toast } from "sonner";
 import { Check, Ellipsis, Menu, Moon, Search, Sun } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -58,10 +65,12 @@ export function App() {
   const [search, setSearch] = useState("");
   const [banglaMode, setBanglaMode] = useState(loadBanglaMode);
   const [engine, setEngine] = useState<AvroInstance | null>(null);
+  const [engineError, setEngineError] = useState(false);
   const [personalWords, setPersonalWords] = useState(() => loadPersonalWords());
   const [commandOpen, setCommandOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const saveTimer = useRef<number | null>(null);
   const [ready, setReady] = useState(false);
@@ -94,11 +103,17 @@ export function App() {
 
   const activateEngine = useCallback(() => {
     enginePromise.current ??= loadEngine();
-    void enginePromise.current.then(setEngine).catch(() => {
-      if (engineFailed.current) return;
-      engineFailed.current = true;
-      toast.error("The phonetic engine could not load. Plain typing still works.");
-    });
+    void enginePromise.current
+      .then((loaded) => {
+        setEngine(loaded);
+        setEngineError(false);
+      })
+      .catch(() => {
+        setEngineError(true);
+        if (engineFailed.current) return;
+        engineFailed.current = true;
+        toast.error("The phonetic engine could not load. Plain typing still works.");
+      });
   }, []);
 
   useEffect(() => {
@@ -234,6 +249,12 @@ export function App() {
     { id: "html", label: "Export as .html", run: () => exportAs("html") },
     { id: "backup", label: "Download full backup", run: () => void exportBackup() },
     { id: "import", label: "Import a file", run: () => fileInputRef.current?.click() },
+    {
+      id: "shortcuts",
+      label: "Keyboard shortcuts",
+      hint: "?",
+      run: () => setShortcutsOpen(true),
+    },
     { id: "theme-light", label: "Theme: light", run: () => setTheme("light") },
     { id: "theme-dark", label: "Theme: dark", run: () => setTheme("dark") },
     { id: "theme-system", label: "Theme: system", run: () => setTheme("system") },
@@ -248,6 +269,14 @@ export function App() {
       if ((event.ctrlKey || event.metaKey) && event.key === ".") {
         event.preventDefault();
         toggleLanguage();
+      }
+      const target = event.target;
+      const typing =
+        target instanceof HTMLElement &&
+        (target.isContentEditable || ["INPUT", "TEXTAREA"].includes(target.tagName));
+      if (event.key === "?" && !typing) {
+        event.preventDefault();
+        setShortcutsOpen(true);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -403,6 +432,7 @@ export function App() {
             personalWords={personalWords}
             mobileCandidates={mobileCandidates}
             saveState={saveState}
+            engineError={engineError}
             onActivate={activateEngine}
             onChange={changeContent}
             onRememberWord={remember}
@@ -423,8 +453,43 @@ export function App() {
       />
 
       <Suspense fallback={null}>
-        <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} actions={commands} />
+        <CommandPalette
+          open={commandOpen}
+          onOpenChange={setCommandOpen}
+          actions={commands}
+          docs={docs}
+          onSelectDraft={(id) => {
+            setActiveId(id);
+            setLibraryOpen(false);
+          }}
+        />
       </Suspense>
+
+      <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Keyboard shortcuts</DialogTitle>
+            <DialogDescription>Everything you need to write without the mouse.</DialogDescription>
+          </DialogHeader>
+          <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+            {[
+              ["Space / Tab / Enter", "Commit the selected Bangla word"],
+              ["↑ / ↓", "Move between suggestions"],
+              ["Esc", "Dismiss suggestions"],
+              ["Ctrl+K", "Open the command palette"],
+              ["Ctrl+.", "Switch between Bangla and English"],
+              ["?", "Show this list"],
+            ].map(([key, description]) => (
+              <div key={key} className="contents">
+                <dt>
+                  <kbd>{key}</kbd>
+                </dt>
+                <dd className="text-muted-foreground">{description}</dd>
+              </div>
+            ))}
+          </dl>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
