@@ -59,12 +59,29 @@ try {
     (node) => getComputedStyle(node.parentElement!).borderTopColor,
   );
   await editor.click();
-  check(
-    "focused paper gets a hairline",
-    paperRule !==
-      (await editor.evaluate((node) => getComputedStyle(node.parentElement!).borderTopColor)),
+  // The paper animates its border over ~150ms. Poll for the settled hairline
+  // instead of sampling the first frame, which raced in CI and failed even
+  // though the focus style was correct.
+  let focusedRule = paperRule;
+  try {
+    await page.waitForFunction(
+      (before) => {
+        const paper = document.querySelector("#editor")?.parentElement;
+        return paper ? getComputedStyle(paper).borderTopColor !== before : false;
+      },
+      paperRule,
+      { timeout: 2000 },
+    );
+    focusedRule = await editor.evaluate(
+      (node) => getComputedStyle(node.parentElement!).borderTopColor,
+    );
+  } catch {
+    // A timeout leaves focusedRule === paperRule, so the check fails below.
+  }
+  check("focused paper gets a hairline", focusedRule !== paperRule, {
     paperRule,
-  );
+    focusedRule,
+  });
   for (const [name, asset] of [
     ["favicon", "favicon.ico"],
     ["logo", "images/logo.svg"],
