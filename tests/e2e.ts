@@ -29,6 +29,59 @@ async function openEditor(page: Page): Promise<Locator> {
   return page.locator("#editor");
 }
 
+// HTML-level checks: what crawlers (which do not run JS) see before mount.
+{
+  const html = await (await fetch(BASE)).text();
+  check(
+    "server HTML carries a canonical link",
+    html.includes('rel="canonical" href="https://ashik-maybe.github.io/okkhor/"'),
+  );
+  check(
+    "server HTML has a keyword-rich title",
+    html.includes("Avro Phonetic") && html.includes("<title>"),
+  );
+  check("server HTML is not an empty shell", html.includes("<h1>Okkhor — Bangla writing studio"));
+  check(
+    "server HTML answers the FAQ visibly",
+    html.includes("Which keyboard does Okkhor use?") && html.includes("Does Okkhor work offline?"),
+  );
+  const ldBlocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+    .map((m) => {
+      try {
+        return JSON.parse(m[1]) as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    })
+    .filter((v): v is Record<string, unknown> => v !== null);
+  const types = ldBlocks.map((v) => v["@type"]);
+  check(
+    "server HTML carries parseable JSON-LD",
+    types.includes("SoftwareApplication") && types.includes("FAQPage"),
+    types,
+  );
+  const software = ldBlocks.find((v) => v["@type"] === "SoftwareApplication");
+  check(
+    "SoftwareApplication schema claims no fabricated rating",
+    software !== undefined && !("aggregateRating" in software),
+  );
+  const robotsRes = await fetch(new URL("robots.txt", BASE));
+  const robotsText = await robotsRes.text();
+  check(
+    "robots.txt allows crawlers and points at the sitemap",
+    robotsRes.status === 200 && robotsText.includes("Sitemap:"),
+    { status: robotsRes.status },
+  );
+  const sitemapRes = await fetch(new URL("sitemap.xml", BASE));
+  const sitemapText = await sitemapRes.text();
+  check(
+    "sitemap.xml lists the canonical URL",
+    sitemapRes.status === 200 &&
+      sitemapText.includes("https://ashik-maybe.github.io/okkhor/</loc>"),
+    { status: sitemapRes.status },
+  );
+}
+
 const browser = await chromium.launch();
 
 try {

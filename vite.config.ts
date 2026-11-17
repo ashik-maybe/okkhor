@@ -22,6 +22,7 @@ export default defineConfig({
         display: "standalone",
         background_color: "#f7f7f0",
         theme_color: "#f7f7f0",
+        categories: ["productivity", "writing"],
         icons: [
           { src: `${base}images/icon-192.png`, sizes: "192x192", type: "image/png" },
           { src: `${base}images/icon-512.png`, sizes: "512x512", type: "image/png" },
