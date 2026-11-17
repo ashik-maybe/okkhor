@@ -21,6 +21,7 @@ interface EditorProps {
   saveState: "saved" | "saving" | "error";
   engineError: boolean;
   onToggleMode: () => void;
+  onOpenKeymap: () => void;
   onActivate: () => void;
   onChange: (value: string) => void;
   onRememberWord: (word: string) => void;
@@ -99,6 +100,7 @@ export function Editor({
   saveState,
   engineError,
   onToggleMode,
+  onOpenKeymap,
   onActivate,
   onChange,
   onRememberWord,
@@ -348,6 +350,13 @@ export function Editor({
                   <span className="text-xs text-muted-foreground">← {roman}</span>
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={onOpenKeymap}
+                className="inline-flex min-h-11 items-center rounded-full border border-transparent px-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
+              >
+                Keymap →
+              </button>
             </div>
           ) : null}
           <p className="sr-only" role="status" aria-live="polite">

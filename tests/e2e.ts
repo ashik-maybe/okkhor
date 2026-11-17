@@ -2,6 +2,7 @@
 // Start `bun run preview --port 4173` first, then run `bun run test:e2e`.
 
 import { chromium, type Locator, type Page } from "playwright";
+import { KEYMAP_EXAMPLES } from "../src/lib/keymap";
 
 const BASE = process.env.BASE ?? "http://localhost:4173/okkhor/";
 const failures: string[] = [];
@@ -109,9 +110,47 @@ try {
   await page.keyboard.press("?");
   check(
     "shortcuts are discoverable",
-    await page.getByText("Keyboard shortcuts").first().isVisible(),
+    await page.getByRole("dialog").getByText("Shortcuts", { exact: true }).isVisible(),
+  );
+  check(
+    "help dialog explains the mechanic",
+    await page.getByText(/Type roman letters and press Space/).isVisible(),
+  );
+  await page.getByRole("button", { name: "Avro keymap", exact: true }).click();
+  check(
+    "keymap is one tap from help",
+    await page.getByRole("textbox", { name: "Filter Avro keymap" }).isVisible(),
+  );
+  const keymapButton = page.getByTitle("Copy kh").first();
+  check("keymap shows keys and glyphs", await keymapButton.isVisible());
+  check("keymap shows a word example", await page.getByText("amar → আমার").first().isVisible());
+  const allKeyRows = await page.getByTitle(/^Copy /).count();
+  await page.getByRole("textbox", { name: "Filter Avro keymap" }).fill("lokkhmi");
+  const filteredRows = await page.getByTitle(/^Copy /).count();
+  check("keymap filter narrows the table", filteredRows > 0 && filteredRows < allKeyRows, {
+    allKeyRows,
+    filteredRows,
+  });
+  await page.getByRole("textbox", { name: "Filter Avro keymap" }).fill("nothing-matches-this");
+  check(
+    "keymap filter explains zero results",
+    await page.getByText("No key matches", { exact: false }).isVisible(),
   );
   await page.keyboard.press("Escape");
+  await page.waitForFunction(() => typeof window.AvroPhonetic === "function", { timeout: 20000 });
+  const keymapMismatches = await page.evaluate((examples) => {
+    const Engine = window.AvroPhonetic;
+    const engine = new Engine(
+      () => ({}),
+      () => {},
+    );
+    return examples.filter((item) => engine.suggest(item.roman).words?.[0] !== item.bangla);
+  }, KEYMAP_EXAMPLES);
+  check(
+    "every keymap example matches the bundled engine",
+    keymapMismatches.length === 0,
+    keymapMismatches,
+  );
   check(
     "accent follows the green palette, not a stray indigo",
     await page.evaluate(() => {

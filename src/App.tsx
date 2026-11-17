@@ -5,13 +5,6 @@ import { Check, Ellipsis, Menu, Moon, Search, Sun } from "lucide-react";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import { ModeSwitch } from "@/components/mode-switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -34,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTheme } from "@/components/theme-provider";
 import { Editor } from "@/features/editor/Editor";
+import { HelpDialog, type HelpTab } from "@/features/help/HelpDialog";
 import { Library } from "@/features/library/Library";
 import type { CommandAction } from "@/features/command/CommandPalette";
 import { loadEngine } from "@/lib/avro-service";
@@ -71,7 +65,8 @@ export function App() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpTab, setHelpTab] = useState<HelpTab>("shortcuts");
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
   const saveTimer = useRef<number | null>(null);
   const [ready, setReady] = useState(false);
@@ -242,6 +237,11 @@ export function App() {
     toast.success("Draft imported");
   };
 
+  const openHelp = (tab: HelpTab) => {
+    setHelpTab(tab);
+    setHelpOpen(true);
+  };
+
   const commands: CommandAction[] = [
     {
       id: "lang",
@@ -285,7 +285,13 @@ export function App() {
       group: "Help",
       label: "Keyboard shortcuts",
       hint: "?",
-      run: () => setShortcutsOpen(true),
+      run: () => openHelp("shortcuts"),
+    },
+    {
+      id: "keymap",
+      group: "Help",
+      label: "Avro keymap",
+      run: () => openHelp("keymap"),
     },
   ];
 
@@ -305,7 +311,7 @@ export function App() {
         (target.isContentEditable || ["INPUT", "TEXTAREA"].includes(target.tagName));
       if (event.key === "?" && !typing) {
         event.preventDefault();
-        setShortcutsOpen(true);
+        openHelp("shortcuts");
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -459,6 +465,7 @@ export function App() {
             saveState={saveState}
             engineError={engineError}
             onToggleMode={toggleLanguage}
+            onOpenKeymap={() => openHelp("keymap")}
             onActivate={activateEngine}
             onChange={changeContent}
             onRememberWord={remember}
@@ -491,31 +498,12 @@ export function App() {
         />
       </Suspense>
 
-      <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Keyboard shortcuts</DialogTitle>
-            <DialogDescription>Everything you need to write without the mouse.</DialogDescription>
-          </DialogHeader>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
-            {[
-              ["Space / Tab / Enter", "Commit the selected Bangla word"],
-              ["↑ / ↓", "Move between suggestions"],
-              ["Esc", "Dismiss suggestions"],
-              ["Ctrl+K", "Open the command palette"],
-              ["Ctrl+.", "Switch between Bangla and English"],
-              ["?", "Show this list"],
-            ].map(([key, description]) => (
-              <div key={key} className="contents">
-                <dt>
-                  <kbd>{key}</kbd>
-                </dt>
-                <dd className="text-muted-foreground">{description}</dd>
-              </div>
-            ))}
-          </dl>
-        </DialogContent>
-      </Dialog>
+      <HelpDialog
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        tab={helpTab}
+        onTabChange={setHelpTab}
+      />
 
       <AlertDialog open={deleteId !== null} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
