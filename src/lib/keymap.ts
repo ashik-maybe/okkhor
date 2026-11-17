@@ -15,9 +15,10 @@ const example = (roman: string, bangla: string) => ({ roman, bangla });
 
 /**
  * The mapping structure follows OmicronLab's "Bangla Typing with Avro Phonetic"
- * (3rd edition, 2011). Glyphs and examples are checked against the engine this
- * app ships; where the PDF advertises a key the engine does not honour (`kx`
- * for ক্ষ), it is left out rather than taught as fact.
+ * and its shipped converter (clsEnglishToBangla.pas). Glyphs and examples are
+ * checked against the engine this app ships. Ambiguous bare sequences such as
+ * `kx` are taught with word examples, since on their own they rank other
+ * words first in the suggestion list.
  */
 export const KEYMAP: KeymapGroup[] = [
   {
@@ -54,14 +55,15 @@ export const KEYMAP: KeymapGroup[] = [
   {
     title: "Consonants",
     entries: [
-      { keys: "k", glyph: "ক", example: example("k", "ক") },
+      { keys: "k, q", glyph: "ক", example: example("q", "ক") },
+      { keys: "x", glyph: "এক্স", example: example("x", "এক্স"), note: "ক্স after a consonant" },
       { keys: "kh", glyph: "খ", example: example("kh", "খ") },
       { keys: "g", glyph: "গ", example: example("g", "গ") },
       { keys: "gh", glyph: "ঘ", example: example("gh", "ঘ") },
       { keys: "Ng", glyph: "ঙ", example: example("Ng", "ঙ") },
       { keys: "c", glyph: "চ", example: example("c", "চ") },
       { keys: "ch", glyph: "ছ", example: example("ch", "ছ") },
-      { keys: "j", glyph: "জ", example: example("j", "জ") },
+      { keys: "j, J", glyph: "জ", example: example("J", "জ") },
       { keys: "jh", glyph: "ঝ", example: example("jh", "ঝ") },
       { keys: "NG", glyph: "ঞ", example: example("NG", "ঞ") },
       { keys: "T", glyph: "ট", example: example("T", "ট") },
@@ -88,7 +90,12 @@ export const KEYMAP: KeymapGroup[] = [
       { keys: "h", glyph: "হ", example: example("h", "হ") },
       { keys: "R", glyph: "ড়", example: example("R", "ড়") },
       { keys: "Rh", glyph: "ঢ়", example: example("Rh", "ঢ়") },
-      { keys: "y, Y", glyph: "য়", example: example("y", "য়") },
+      {
+        keys: "y, Y",
+        glyph: "য়",
+        example: example("y", "য়"),
+        note: "Y is forced; y becomes ্য after a consonant",
+      },
     ],
   },
   {
@@ -97,8 +104,17 @@ export const KEYMAP: KeymapGroup[] = [
       { keys: "ng", glyph: "ং", example: example("bangla", "বাংলা"), note: "after a vowel" },
       { keys: ":", glyph: "ঃ" },
       { keys: "^", glyph: "ঁ" },
+      {
+        keys: "`a, `o…",
+        glyph: "আ, অ…",
+        note: "force the full vowel",
+        example: example("`o", "অ"),
+      },
+      { keys: "a`, I`…", glyph: "া, ী…", note: "force the vowel sign", example: example("a`", "া") },
       { keys: "t``", glyph: "ৎ", example: example("t``", "ৎ") },
-      { keys: ",,", glyph: "্", note: "hasanta" },
+      { keys: ",,", glyph: "্", note: "hasanta + ZWNJ" },
+      { keys: "w", glyph: "ও", example: example("w", "ও"), note: "at the start" },
+      { keys: "w", glyph: "ওয়", note: "before a vowel" },
       { keys: "w", glyph: "ব-ফলা", example: example("bishwo", "বিশ্ব") },
       { keys: "y", glyph: "য-ফলা", example: example("bybohar", "ব্যবহার") },
       { keys: "Z", glyph: "য-ফলা", example: example("aZromeTik", "অ্যারমেটিক"), note: "forced" },
@@ -112,6 +128,7 @@ export const KEYMAP: KeymapGroup[] = [
     title: "Common conjuncts",
     entries: [
       { keys: "kkh", glyph: "ক্ষ", example: example("lokkhmi", "লক্ষ্মী") },
+      { keys: "kx", glyph: "ক্ষ", example: example("kxoma", "ক্ষমা"), note: "also kSh" },
       { keys: "nt", glyph: "ন্ত", example: example("onto", "অন্ত") },
       { keys: "gg", glyph: "জ্ঞ", example: example("biggo", "বিজ্ঞ") },
       { keys: "mb", glyph: "ম্ব", example: example("sombol", "সম্বল") },
@@ -128,8 +145,12 @@ export const KEYMAP: KeymapGroup[] = [
     entries: [
       { keys: ".", glyph: "।", example: example("bangla.", "বাংলা।"), note: "dari" },
       { keys: ".`", glyph: ".", note: "full stop" },
+      { keys: "..", glyph: "।।", example: example("..", "।।") },
+      { keys: "...", glyph: "...", example: example("...", "...") },
       { keys: "$", glyph: "৳", example: example("100$", "১০০৳"), note: "taka" },
+      { keys: "0–9", glyph: "০–৯", example: example("1", "১") },
       { keys: ":`", glyph: ":", note: "colon" },
+      { keys: "^`", glyph: "^", example: example("^`", "^") },
       { keys: "; ? ! ( ) /", glyph: "as typed", note: "pass through" },
     ],
   },

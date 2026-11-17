@@ -124,6 +124,9 @@ try {
   const keymapButton = page.getByTitle("Copy kh").first();
   check("keymap shows keys and glyphs", await keymapButton.isVisible());
   check("keymap shows a word example", await page.getByText("amar → আমার").first().isVisible());
+  await page.getByRole("textbox", { name: "Filter Avro keymap" }).fill("kxoma");
+  check("kx is documented as ক্ষ", await page.getByText("kxoma → ক্ষমা").isVisible());
+  await page.getByRole("textbox", { name: "Filter Avro keymap" }).fill("");
   const allKeyRows = await page.getByTitle(/^Copy /).count();
   await page.getByRole("textbox", { name: "Filter Avro keymap" }).fill("lokkhmi");
   const filteredRows = await page.getByTitle(/^Copy /).count();
