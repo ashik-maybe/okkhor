@@ -67,6 +67,7 @@ export function App() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpTab, setHelpTab] = useState<HelpTab>("shortcuts");
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
@@ -156,6 +157,15 @@ export function App() {
     if (activeId === deleteId) setActiveId(null);
     setDeleteId(null);
     toast.success(`Deleted “${title}”`);
+  };
+
+  const confirmDeleteAll = async () => {
+    const count = docs.length;
+    await db.docs.clear();
+    const id = await createDoc();
+    setActiveId(id);
+    setDeleteAllOpen(false);
+    toast.success(count === 1 ? "Deleted 1 draft" : `Deleted ${count} drafts`);
   };
 
   const changeContent = (value: string) => {
@@ -469,6 +479,12 @@ export function App() {
               <DropdownMenuItem onClick={forgetPersonalWords}>
                 Clear personal words
               </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={() => setDeleteAllOpen(true)}
+              >
+                Delete all drafts…
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -580,6 +596,27 @@ export function App() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => void confirmDelete()}>Delete draft</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteAllOpen} onOpenChange={setDeleteAllOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete all drafts?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove {docs.length === 1 ? "1 draft" : `${docs.length} drafts`}{" "}
+              from this device. This cannot be undone. Consider downloading a backup first.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => void confirmDeleteAll()}
+            >
+              Delete all drafts
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
