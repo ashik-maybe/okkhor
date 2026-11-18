@@ -689,17 +689,6 @@ try {
     await mobilePage.evaluate(() => document.activeElement?.getAttribute("aria-pressed") === null),
   );
   await mobilePage.keyboard.press("Escape");
-  const teaching = await mobilePage.evaluate(() => {
-    const hint = document.querySelector("#editor-hint")!.getBoundingClientRect();
-    const chip = [...document.querySelectorAll("button")]
-      .find((node) => node.textContent?.includes("ami"))
-      ?.getBoundingClientRect();
-    return {
-      gap: chip ? Math.round(chip.top - hint.bottom) : null,
-      hintBottom: Math.round(hint.bottom),
-    };
-  });
-  check("first-run examples sit under the prompt", (teaching.gap ?? 999) <= 120, teaching);
   const titleWidth = (await mobilePage.getByRole("textbox", { name: "Draft title" }).boundingBox())
     ?.width;
   check("draft title is legible on a phone", (titleWidth ?? 0) >= 120, titleWidth);

@@ -542,7 +542,6 @@ export function App() {
             saveState={saveState}
             engineError={engineError}
             onToggleMode={toggleLanguage}
-            onOpenKeymap={() => openHelp("keymap")}
             onCopy={() => void copyEverything()}
             onActivate={activateEngine}
             onChange={changeContent}

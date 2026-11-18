@@ -25,7 +25,6 @@ interface EditorProps {
   saveState: "saved" | "saving" | "error";
   engineError: boolean;
   onToggleMode: () => void;
-  onOpenKeymap: () => void;
   onCopy: () => void;
   onActivate: () => void;
   onChange: (value: string) => void;
@@ -109,7 +108,6 @@ export function Editor({
   saveState,
   engineError,
   onToggleMode,
-  onOpenKeymap,
   onCopy,
   onActivate,
   onChange,
@@ -217,23 +215,6 @@ export function Editor({
     [candidates, engine, hide, onChange, onRememberWord, resize],
   );
 
-  const insertExample = (roman: string, bangla: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    const next = `${bangla} `;
-    textarea.value = next;
-    textarea.setSelectionRange(next.length, next.length);
-    onChange(next);
-    onRememberWord(bangla);
-    if (engine) commitCandidate(engine, roman, bangla);
-    setAnnouncement(`Committed ${bangla}`);
-    setIntroDismissed(true);
-    markHintsSeen();
-    hide();
-    resize();
-    textarea.focus();
-  };
-
   const showIntro = !introDismissed && banglaMode && content.trim() === "";
 
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -310,33 +291,6 @@ export function Editor({
               </span>
             </div>
           </div>
-
-          {showIntro ? (
-            <div className="mx-auto mb-3 flex w-full max-w-[66ch] flex-wrap items-center gap-2 border-b border-border pb-3">
-              <span className="text-xs text-muted-foreground">Try:</span>
-              {[
-                ["ami", "আমি"],
-                ["bhalo", "ভালো"],
-              ].map(([roman, bangla]) => (
-                <button
-                  key={roman}
-                  type="button"
-                  onClick={() => insertExample(roman, bangla)}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-background px-3 text-sm transition-colors hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
-                >
-                  <span className="font-bangla font-medium">{bangla}</span>
-                  <span className="text-xs text-muted-foreground">← {roman}</span>
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={onOpenKeymap}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-transparent px-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
-              >
-                Keymap →
-              </button>
-            </div>
-          ) : null}
 
           <label className="sr-only" htmlFor="editor">
             {banglaMode ? "Write in Bangla" : "Write in English"}
