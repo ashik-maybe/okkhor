@@ -1,82 +1,93 @@
 # Okkhor
 
-A private, offline Bangla writing studio. Type roman letters and choose Bangla words from a ranked candidate strip. Everything stays in the browser.
+**A private, offline Bangla writing studio for the browser.** Type roman letters, get Bangla words — your writing never leaves your device.
 
-Live: https://okkhor.asf.run/
+- **Live:** https://okkhor.asf.run/
+- **GitHub Pages (alias, redirects to the live site):** https://ashik-maybe.github.io/okkhor/
+- **Source:** https://github.com/ashik-maybe/okkhor
+- **License:** MIT
 
-## What is in the MVP
+## Why Okkhor
 
-- React 19, Vite 7, TypeScript, Tailwind CSS v4, shadcn/ui.
-- The original 2013 Avro phonetic engine, loaded lazily as a classic script.
-- A modern alias layer: common tech and loanwords map to canonical Bangla spellings.
-- Candidate ranking from aliases and personal word history.
-- Unlimited drafts in IndexedDB, with autosave, search, rename and delete.
-- One-time import of the five old `draft-0`…`draft-4` localStorage drafts.
-- Export to `.txt`, `.md`, `.html`, plus a JSON backup and file import.
-- Light, dark and system themes.
-- Command palette (`Ctrl/Cmd+K`), `Ctrl+.` language toggle, and a mobile candidate rail above the keyboard.
-- Installable PWA with an offline shell. The 3.8 MB engine is cached at runtime, not precached.
+Okkhor is built for writing Bangla comfortably on a phone or laptop without installing a keyboard or creating an account. It runs entirely in the browser: the Avro Phonetic engine converts roman (Latin) letters into Bangla words as you type, and everything is stored locally with IndexedDB. There is no server, no signup, and no tracking.
 
-## Layout
+## Features
 
-```
-index.html                 app entry and theme bootstrap
-src/main.tsx               React root
-src/App.tsx                workspace shell and wiring
-src/features/editor/       textarea, caret positioning, candidate keys
-src/features/candidates/   floating list and mobile candidate strip
-src/features/library/      draft list and search
-src/features/command/      command palette
-src/lib/avro-service.ts    engine loader, token extraction and ranking
-src/lib/documents.ts       IndexedDB documents and legacy migration
-src/lib/db.ts              Dexie schema
-src/data/modern-aliases.ts curated roman → Bangla aliases
-src/engine/avro.min.js     unmodified 2013 phonetic engine and dictionary
-tests/unit.test.ts         Vitest checks
-tests/e2e.ts               Playwright smoke checks
-```
+- **Avro Phonetic typing** — the same layout as Avro Keyboard. Type `amar`, press Space, and `আমার` is committed.
+- **Smart candidates** — a ranked suggestion strip (desktop) and a bottom candidate bar (phones), with arrow-key navigation and tap-to-commit.
+- **Multi-draft library** — auto-saving drafts with titles, timestamps, and a searchable sidebar.
+- **Personal word learning** — words you commit are remembered and ranked higher next time.
+- **Bangla / English toggle** — switch modes in one tap (`Ctrl + .`).
+- **Copy everything** — one-tap copy of the whole draft from the header (next to the toggler on phones), the Document actions menu, or the command palette (`Ctrl + K`).
+- **Export** — `.txt`, `.md`, `.html`, plus a full JSON backup and restore (Import file).
+- **Draft management** — delete a single draft or all drafts at once (with confirmation), clear personal words.
+- **Command palette** — `Ctrl + K` for every action, including theme and draft switching.
+- **Themes** — light, dark, or system.
+- **Offline PWA** — installs like an app, works with no network after the first visit.
+- **Privacy-first** — no accounts, no analytics, no servers. Clearing browser data removes everything.
+- **Accessible** — 44px touch targets, reduced-motion support, keyboard-first.
 
-## Brand
+## How it works
 
-The app mark is a lac-red squircle with the Bengali letter অ cut out as negative space. The glyph outline is derived from Noto Sans Bengali (SIL Open Font License). Editable masters live in `public/images/logo.svg`, `logo-dark.svg`, and `logo-mono.svg`; the favicon, touch icon, PWA icons, and social card are generated from the light master.
+1. Type roman letters — Okkhor uses the Avro Phonetic layout.
+2. Pick a word from the suggestion list with `↑` / `↓`, or press `Space` to accept the top choice.
+3. Keep writing — every word is saved on your device as you go.
 
-## Input, motion and performance
+Example: type `amar`, press Space, and **আমার** appears.
 
-The textarea is a combobox: it owns the active suggestion through `aria-activedescendant`, and committed words are announced in a polite live region. Motion uses shared easing and duration tokens, stays on compositor properties, and collapses under `prefers-reduced-motion`. The 3.9 MB phonetic dictionary and a 52 KB word-frequency table load after first paint or on editor focus, and the command palette and vendor code are split into cacheable chunks. Frequency only re-ranks candidates the engine already produced; it never replaces the dictionary.
+## Install
 
-## Develop
+On Android or iOS, open the site and use your browser's **Add to Home Screen** / **Install app**. On desktop, use the install icon in the address bar. After that Okkhor opens like any other app and works offline.
 
-```bash
+## Keyboard shortcuts
+
+| Keys       | Action                            |
+| ---------- | --------------------------------- |
+| `Space`    | Commit the selected Bangla word   |
+| `↑` / `↓`  | Move between suggestions          |
+| `Esc`      | Dismiss suggestions               |
+| `Ctrl + K` | Open the command palette          |
+| `Ctrl + .` | Switch between Bangla and English |
+| `?`        | Show the shortcut list            |
+
+## Privacy
+
+Okkhor has no accounts and no servers. Nothing you write is sent anywhere; drafts are stored in your browser (IndexedDB / local storage). Clearing browser data removes them — use **Download backup** before that if you want to keep them. Personal words are stored separately and can be cleared from Document actions.
+
+## Development
+
+```sh
 bun install
-bun run dev
+bun run dev            # dev server
+bun run build          # typecheck + vite build
+bun run preview        # preview the built site (port 4173)
+bun run typecheck      # tsc --noEmit
+bun run lint           # oxlint
+bun run format         # oxfmt --write .
+bun run format:check   # oxfmt --check .
+bun run test           # vitest (unit)
+bun run test:e2e       # Playwright against the preview (default http://localhost:4173/)
 ```
 
-## Verify
+End-to-end tests need the preview running first (`bun run preview --port 4173`), or let the workflow do it. Override the target with `BASE`:
 
-```bash
-bun run typecheck
-bun run lint          # oxlint, stock defaults
-bun run format:check  # oxfmt, stock defaults
-bun run test
-bun run build
-bun run preview --port 4173
-bun run test:e2e
+```sh
+BASE=https://okkhor.asf.run/ bun run test:e2e
 ```
-
-`BASE=https://okkhor.asf.run/ bun run test:e2e` targets the live site.
 
 ## Deploy
 
-Push to `main`. The workflow typechecks, lints, checks formatting, runs unit and browser tests, builds, and publishes `dist/` to GitHub Pages. Set Pages source to **GitHub Actions** and allow `main` in the `github-pages` environment.
+Push to `main`. The workflow typechecks, lints, checks formatting, runs unit and browser tests, builds, and publishes `dist/` to GitHub Pages (source set to **GitHub Actions**). The custom domain is recorded in `CNAME` and configured in the repo's Pages settings; `https://ashik-maybe.github.io/okkhor/` keeps working as a redirect to the custom domain.
 
-## Licensing
+## Tech stack
 
-Okkhor's original application code, alias data, keymap and brand assets are licensed under the MIT License; see `LICENSE`.
+- React 19, Vite 7, TypeScript, Tailwind CSS v4, shadcn/ui
+- Dexie (IndexedDB) for drafts and settings
+- vite-plugin-pwa for offline installability
+- Fonts: Tiro Bangla, Noto Sans Bengali, Anek Bangla (variable)
+- The original 2013 Avro phonetic engine, loaded lazily as a classic script
 
-Third-party material keeps its own licence and is **not** covered by the repository's MIT licence:
+## Credits
 
-- `src/engine/avro.min.js` — the original OmicronLab 2013 engine, **MPL-1.1**.
-- `src/data/word-frequency.tsv` — derived from wordfreq's Bengali data, **CC BY-SA 4.0**. See `public/licenses/wordfreq.md`; regenerate it with `python3 scripts/build-word-frequency.py`.
-- The brand glyph outline is derived from Noto Sans Bengali, **SIL Open Font License 1.1**.
-
-Bundled npm dependencies retain their respective licences as declared in their packages.
+- Avro Phonetic engine: OmicronLab (https://www.omicronlab.com/) — the same layout used by Avro Keyboard.
+- Built as a modern, offline, privacy-first take on that engine.

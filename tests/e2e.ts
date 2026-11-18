@@ -670,6 +670,10 @@ try {
   await openEditor(mobilePage);
   check("mobile editor is visible", await mobilePage.isVisible("#editor"));
   check(
+    "first-run editor is a real writing page, not one line",
+    ((await mobilePage.locator("#editor").boundingBox())?.height ?? 0) >= 200,
+  );
+  check(
     "GitHub icon stays out of the phone header",
     !(await mobilePage
       .locator("header")

@@ -311,6 +311,33 @@ export function Editor({
             </div>
           </div>
 
+          {showIntro ? (
+            <div className="mx-auto mb-3 flex w-full max-w-[66ch] flex-wrap items-center gap-2 border-b border-border pb-3">
+              <span className="text-xs text-muted-foreground">Try:</span>
+              {[
+                ["ami", "আমি"],
+                ["bhalo", "ভালো"],
+              ].map(([roman, bangla]) => (
+                <button
+                  key={roman}
+                  type="button"
+                  onClick={() => insertExample(roman, bangla)}
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-background px-3 text-sm transition-colors hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
+                >
+                  <span className="font-bangla font-medium">{bangla}</span>
+                  <span className="text-xs text-muted-foreground">← {roman}</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={onOpenKeymap}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-transparent px-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
+              >
+                Keymap →
+              </button>
+            </div>
+          ) : null}
+
           <label className="sr-only" htmlFor="editor">
             {banglaMode ? "Write in Bangla" : "Write in English"}
           </label>
@@ -336,9 +363,7 @@ export function Editor({
             placeholder={banglaMode ? "এখানে লিখুন…" : "Start writing…"}
             className={cn(
               "editor-input w-full max-w-[66ch] resize-none break-words self-center bg-transparent font-editor text-[1.4rem] leading-[1.9] text-pretty text-foreground caret-primary outline-none placeholder:text-muted-foreground sm:text-editor",
-              showIntro
-                ? "min-h-12 flex-none"
-                : "min-h-[45vh] flex-1 [@media(max-height:700px)]:min-h-[30vh]",
+              "min-h-[45vh] flex-1 [@media(max-height:700px)]:min-h-[30vh]",
             )}
             onCompositionStart={() => {
               composingRef.current = true;
@@ -358,32 +383,6 @@ export function Editor({
             onClick={refreshCandidates}
             onBlur={() => window.setTimeout(hide, 120)}
           />
-          {showIntro ? (
-            <div className="mx-auto mt-3 flex w-full max-w-[66ch] flex-wrap items-center gap-2 border-t border-border pt-3">
-              <span className="text-xs text-muted-foreground">Try:</span>
-              {[
-                ["ami", "আমি"],
-                ["bhalo", "ভালো"],
-              ].map(([roman, bangla]) => (
-                <button
-                  key={roman}
-                  type="button"
-                  onClick={() => insertExample(roman, bangla)}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-border bg-background px-3 text-sm transition-colors hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
-                >
-                  <span className="font-bangla font-medium">{bangla}</span>
-                  <span className="text-xs text-muted-foreground">← {roman}</span>
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={onOpenKeymap}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-transparent px-2 text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-primary focus-visible:ring-2 focus-visible:ring-ring sm:min-h-9"
-              >
-                Keymap →
-              </button>
-            </div>
-          ) : null}
           <p className="sr-only" role="status" aria-live="polite">
             {announcement}
           </p>
