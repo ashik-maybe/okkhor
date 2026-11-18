@@ -2,7 +2,7 @@
 
 A private, offline Bangla writing studio. Type roman letters and choose Bangla words from a ranked candidate strip. Everything stays in the browser.
 
-Live: https://ashik-maybe.github.io/okkhor/
+Live: https://okkhor.asf.run/
 
 ## What is in the MVP
 
@@ -63,7 +63,7 @@ bun run preview --port 4173
 bun run test:e2e
 ```
 
-`BASE=https://ashik-maybe.github.io/okkhor/ bun run test:e2e` targets the live site.
+`BASE=https://okkhor.asf.run/ bun run test:e2e` targets the live site.
 
 ## Deploy
 

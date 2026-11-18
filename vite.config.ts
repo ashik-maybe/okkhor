@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-const base = "/okkhor/";
+const base = "/";
 
 export default defineConfig({
   base,
@@ -41,7 +41,7 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         runtimeCaching: [
           {
-            urlPattern: /\/okkhor\/assets\/avro.*\.js$/,
+            urlPattern: /\/assets\/avro.*\.js$/,
             handler: "CacheFirst",
             options: {
               cacheName: "okkhor-engine",

@@ -5,7 +5,7 @@ import { chromium, type Locator, type Page } from "playwright";
 import { KEYMAP_EXAMPLES } from "../src/lib/keymap";
 import { GITHUB_URL } from "../src/lib/links";
 
-const BASE = process.env.BASE ?? "http://localhost:4173/okkhor/";
+const BASE = process.env.BASE ?? "http://localhost:4173/";
 const failures: string[] = [];
 
 function check(name: string, ok: boolean, detail?: unknown) {
@@ -34,7 +34,7 @@ async function openEditor(page: Page): Promise<Locator> {
   const html = await (await fetch(BASE)).text();
   check(
     "server HTML carries a canonical link",
-    html.includes('rel="canonical" href="https://ashik-maybe.github.io/okkhor/"'),
+    html.includes('rel="canonical" href="https://okkhor.asf.run/"'),
   );
   check(
     "server HTML has a keyword-rich title",
@@ -82,8 +82,7 @@ async function openEditor(page: Page): Promise<Locator> {
   const sitemapText = await sitemapRes.text();
   check(
     "sitemap.xml lists the canonical URL",
-    sitemapRes.status === 200 &&
-      sitemapText.includes("https://ashik-maybe.github.io/okkhor/</loc>"),
+    sitemapRes.status === 200 && sitemapText.includes("https://okkhor.asf.run/</loc>"),
     { status: sitemapRes.status },
   );
 }

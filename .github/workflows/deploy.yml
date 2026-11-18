@@ -40,12 +40,12 @@ jobs:
         run: |
           bun run preview --port 4173 --strictPort &
           for i in $(seq 1 30); do
-            curl -fsS http://localhost:4173/okkhor/ >/dev/null && break
+            curl -fsS http://localhost:4173/ >/dev/null && break
             sleep 1
           done
           bun run test:e2e
         env:
-          BASE: http://localhost:4173/okkhor/
+          BASE: http://localhost:4173/
 
       - uses: actions/upload-artifact@v7
         with:
@@ -90,4 +90,4 @@ jobs:
         run: |
           curl -sS -X POST "https://api.indexnow.org/indexnow" \
             -H "Content-Type: application/json" \
-            -d '{"host":"ashik-maybe.github.io","key":"d096431e06a1d35c7771602e57ebb6f8","keyLocation":"https://ashik-maybe.github.io/okkhor/d096431e06a1d35c7771602e57ebb6f8.txt","urlList":["https://ashik-maybe.github.io/okkhor/"]}'
+            -d '{"host":"okkhor.asf.run","key":"d096431e06a1d35c7771602e57ebb6f8","keyLocation":"https://okkhor.asf.run/d096431e06a1d35c7771602e57ebb6f8.txt","urlList":["https://okkhor.asf.run/"]}'
